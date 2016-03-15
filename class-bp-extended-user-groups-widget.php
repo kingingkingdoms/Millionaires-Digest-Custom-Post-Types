@@ -185,10 +185,10 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 				<?php _e( 'List Groups of which user is:', 'bp-extended-user-groups-widget' ); ?>
 			</label>
 			<label>
-				<input name="<?php echo $this->get_field_name( 'list_type' ); ?>" type="radio" value="member" <?php checked( $list_type, 'member' ); ?> /> Members
+				<input name="<?php echo $this->get_field_name( 'list_type' ); ?>" type="radio" value="member" <?php checked( $list_type, 'member' ); ?> /> <?php _e( 'Member', 'bp-extended-user-groups-widget' );?>
 			</label>
 			<label>
-				<input name="<?php echo $this->get_field_name( 'list_type' ); ?>" type="radio" value="admin" <?php checked( $list_type, 'admin' ); ?> /> Admin
+				<input name="<?php echo $this->get_field_name( 'list_type' ); ?>" type="radio" value="admin" <?php checked( $list_type, 'admin' ); ?> /> <?php _e( 'Admin', 'bp-extended-user-groups-widget'); ?>
 			</label>
 		</p>
 
