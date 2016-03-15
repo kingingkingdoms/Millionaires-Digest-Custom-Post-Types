@@ -194,16 +194,25 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 
 		<p>
 			<label for="<?php echo $this->get_field_id( 'type' ); ?>">
-				<?php _e( 'Type', 'bp-extended-user-groups-widget' ); ?>
+				<?php _e( 'List Type', 'bp-extended-user-groups-widget' ); ?>
 			</label>
 			<select name="<?php echo $this->get_field_name( 'type' ); ?>" id="<?php echo $this->get_field_id( 'type' ); ?>">
 
-				<option value="active" <?php echo selected( 'active', $type, true ) ?>>
+				<option value="active" <?php selected( 'active', $type, true ) ?>>
 					<?php _e( 'Most Recent Active', 'bp-extended-user-groups-widget' ) ?>
 				</option>
 
-				<option value="popular" <?php echo selected( 'popular', $type, true ) ?>>
+				<option value="popular" <?php selected( 'popular', $type, true ) ?>>
 					<?php _e( 'Most Popular', 'bp-extended-user-groups-widget' ) ?>
+				</option>
+				<option value="alphabetical" <?php selected( 'alphabetical', $type, true ) ?>>
+					<?php _e( 'Alphabetical', 'bp-extended-user-groups-widget' ) ?>
+				</option>
+				<option value="newest" <?php selected( 'newest', $type, true ) ?>>
+					<?php _e( 'New Groups', 'bp-extended-user-groups-widget' ) ?>
+				</option>
+				<option value="random" <?php selected( 'random', $type, true ) ?>>
+					<?php _e( 'Random', 'bp-extended-user-groups-widget' ) ?>
 				</option>
 
 			</select>
@@ -214,10 +223,10 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 				<?php _e( 'Order', 'bp-extended-user-groups-widget' ); ?>
 			</label>
 			<select name="<?php echo $this->get_field_name( 'order' ); ?>" id="<?php echo $this->get_field_id( 'order' ); ?>">
-				<option value="ASC" <?php echo selected( 'ASC', $order, true ) ?>>
+				<option value="ASC" <?php selected( 'ASC', $order, true ) ?>>
 					<?php _e( 'Ascending Order', 'bp-extended-user-groups-widget' ) ?>
 				</option>
-				<option value="DESC" <?php echo selected( 'DESC', $order, true ) ?>>
+				<option value="DESC" <?php selected( 'DESC', $order, true ) ?>>
 					<?php _e( 'Descending Order', 'bp-extended-user-groups-widget' ) ?>
 				</option>
 			</select>
