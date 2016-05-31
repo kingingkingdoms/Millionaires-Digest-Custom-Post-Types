@@ -80,11 +80,11 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 
 		<?php if ( bp_has_groups( $group_args ) ) : ?>
 
-			<ul id="groups-list" class="item-list">
+			<ul id="extended-groups-list" class="item-list">
 
 				<?php while ( bp_groups() ) : bp_the_group(); ?>
 
-					<li <?php bp_group_class( array( 'bp-extended-user-groups-widget-item' ) ); ?>>
+					<li <?php bp_group_class( array( 'bp-extended-user-groups-widget-item bp-extended-clearfix' ) ); ?>>
 
 						<div class="item-avatar">
 
@@ -134,7 +134,19 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 			</div>
 
 		<?php endif; ?>
-
+		
+		<style type="text/css">
+			.bp-extended-clearfix:after {
+				content:"";
+				display:table;
+				clear:both;
+			}
+			#extended-groups-list{
+				list-style: none;
+				margin-left:0;
+			}
+		</style>
+		
 		<?php echo $after_widget; ?>
 
 		<?php
