@@ -84,7 +84,7 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 
 				<?php while ( bp_groups() ) : bp_the_group(); ?>
 
-					<li <?php bp_group_class( array( 'bp-extended-user-groups-widget-item bp-extended-clearfix' ) ); ?>>
+					<li <?php bp_group_class( array( 'bp-extended-user-groups-widget-item bp-extended-groups-clearfix' ) ); ?>>
 
 						<div class="item-avatar">
 
@@ -136,7 +136,7 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 		<?php endif; ?>
 		
 		<style type="text/css">
-			.bp-extended-clearfix:after {
+			.bp-extended-groups-clearfix:after {
 				content:"";
 				display:table;
 				clear:both;

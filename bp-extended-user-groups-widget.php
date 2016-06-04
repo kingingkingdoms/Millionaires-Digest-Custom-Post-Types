@@ -2,7 +2,7 @@
 
 /* Plugin Name: BuddyPress Extended User Groups Widget
  * Plugin URI: http://buddydev.com/plugins/bp-extended-user-groups-widget/
- * Version: 1.0.0
+ * Version: 1.0.1
  * Description: Flexible group listing for BuddyPress user groups
  * Author: Ravi Sharma
  * Author URI: http://buddydev.com/
