@@ -75,6 +75,7 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 			$group_args['include']  = $group_ids;
 
 		}
+		$group_args['show_hidden'] = true;//show hidden groups too
 
 		?>
 
