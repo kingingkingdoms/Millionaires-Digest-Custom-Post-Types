@@ -52,7 +52,7 @@ Class BP_Extended_User_Groups_Widget_Helper {
      */
     public function load_text_domain() {
 
-        load_plugin_textdomain( 'bp-extended-user-groups-widget', FALSE, $this->path . 'languages/' );
+        load_plugin_textdomain( 'bp-extended-user-groups-widget', FALSE, plugin_basename( dirname( __FILE__ ) ) . '/languages' );
 
     }
 
