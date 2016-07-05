@@ -103,13 +103,17 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 							</div>
 
 							<div class="item-meta">
-                        
-                                <span class="activity">
-		                            <?php
-			                            if ( 'popular' == $instance['type'] ) {
-				                            bp_group_member_count();
-			                            }
-		                            ?>
+                                                 
+								<span class="activity">
+									<?php
+										if ( 'newest' == $instance['type'] ) {
+											printf( __( 'created %s', 'bp-extended-user-groups-widget' ), bp_get_group_date_created() );
+										} elseif ( 'active' == $instance['type'] ) {
+											printf( __( 'active %s', 'bp-extended-user-groups-widget' ), bp_get_group_last_active() );
+										} elseif ( 'popular' == $instance['type'] ) {
+											bp_group_member_count();
+										}
+									?>
 								</span>
 
 							</div>
