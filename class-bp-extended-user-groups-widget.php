@@ -26,12 +26,19 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 
 		extract( $args );
 
-		//don't show to non logged in user
-		if ( ! is_user_logged_in() ) {
+		//don't show to non logged in user if is not BuddyPress user page
+		if ( ! is_user_logged_in() && ! bp_is_user() ) {
 			return;//don't show
 		}
 
 		$user_id   = get_current_user_id();
+
+		if ( $user_id ) {
+			$user_id = $user_id;
+		} elseif ( bp_is_user() ) {
+			$user_id = bp_displayed_user_id();
+		}
+
 		$list_type = $instance['list_type'];
 		//type: active,random  etc
 		if ( empty( $instance['type'] ) ) {
@@ -180,6 +187,7 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 
 		$defaults = array(
 			'title'     => __( 'Your Groups', 'bp-extended-user-groups-widget' ),
+			'group_of'  => 'loggedin',
 			'list_type' => 'member',
 			'type'      => 'active',
 			'order'     => 'ASC',
@@ -189,6 +197,7 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 		$instance = wp_parse_args( (array) $instance, $defaults );
 
 		$title      = strip_tags( $instance['title'] );
+		$group_of      = strip_tags( $instance['group_of'] );
 		$limit      = strip_tags( $instance['limit'] );
 		$type       = strip_tags( $instance['type'] );
 		$order      = strip_tags( $instance['order'] );
@@ -203,8 +212,20 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 		</p>
 
 		<p>
+			<label for="<?php echo $this->get_field_id( 'group_of' ); ?>">
+				<?php _e( 'List Groups of: ', 'bp-extended-user-groups-widget' ); ?>
+			</label>
+			<label>
+				<input name="<?php echo $this->get_field_name( 'group_of' ); ?>" type="radio" value="loggedin" <?php checked( $group_of, 'loggedin' ); ?> /> <?php _e( 'LoggedIn User', 'bp-extended-user-groups-widget' );?>
+			</label>
+			<label>
+				<input name="<?php echo $this->get_field_name( 'group_of' ); ?>" type="radio" value="displayed" <?php checked( $group_of, 'displayed' ); ?> /> <?php _e( 'Displayed User', 'bp-extended-user-groups-widget'); ?>
+			</label>
+		</p>
+
+		<p>
 			<label for="<?php echo $this->get_field_id( 'list_type' ); ?>">
-				<?php _e( 'List Groups of which user is:', 'bp-extended-user-groups-widget' ); ?>
+				<?php _e( 'In Group User is: ', 'bp-extended-user-groups-widget' ); ?>
 			</label>
 			<label>
 				<input name="<?php echo $this->get_field_name( 'list_type' ); ?>" type="radio" value="member" <?php checked( $list_type, 'member' ); ?> /> <?php _e( 'Member', 'bp-extended-user-groups-widget' );?>
