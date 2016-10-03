@@ -24,44 +24,43 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 
 	public function widget( $args, $instance ) {
 
-		extract( $args );
-
-		//don't show to non logged in user if is not BuddyPress user page
-		if ( ! is_user_logged_in() && ! bp_is_user() ) {
-			return;//don't show
-		}
-
 		$user_id   = get_current_user_id();
 
-		if ( $user_id ) {
+		//don't show to non logged in user if is not BuddyPress user page
+
+		$defaults = array(
+			'title'     => __( 'Your Groups', 'bp-extended-user-groups-widget' ),
+			'groups_of'  => 'loggedin',
+			'list_type' => 'member',
+			'type'      => 'active',
+			'order'     => 'ASC',
+			'limit'     => 5,
+		);
+
+		$instance = wp_parse_args( (array) $instance, $defaults );
+
+		if ( $instance['groups_of'] == 'loggedin' ) {
+
+			if ( ! $user_id ) {
+				return '';
+			}
+
 			$user_id = $user_id;
-		} elseif ( bp_is_user() ) {
+
+		} elseif ( $instance['groups_of'] == 'displayed' ) {
+
 			$user_id = bp_displayed_user_id();
-		}
 
-		$list_type = $instance['list_type'];
-		//type: active,random  etc
-		if ( empty( $instance['type'] ) ) {
-			$instance['type'] = 'popular';
-		}
-
-		if ( empty( $instance['order'] ) ) {
-			$instance['order'] = 'ASC';
-		}
-
-		if ( empty( $instance['limit'] ) ) {
-			$instance['limit'] = 5;
-		}
-
-		if ( empty( $instance['title'] ) ) {
-			$instance['title'] = __( 'Your Groups', 'bp-extended-user-groups-widget' );
+			if ( ! $user_id ) {
+				return '';
+			}
 		}
 
 		$title = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
 
-		echo $before_widget;
+		echo $args['before_widget'];
 
-		echo $before_title . $title . $after_title;
+		echo $args['before_title'] . $title . $args['after_title'];
 
 		$group_args = array(
 			'user_id'  => $user_id,
@@ -72,7 +71,7 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 		);
 
 		//modify list for groups  when we need t list all groups of which the current user is admin
-		if ( $list_type == 'admin' ) {
+		if ( $instance['list_type'] == 'admin' ) {
 
 			unset( $group_args['user_id'] );
 
@@ -164,7 +163,7 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 			}
 		</style>
 		
-		<?php echo $after_widget; ?>
+		<?php echo $args['after_widget']; ?>
 
 		<?php
 
@@ -174,9 +173,10 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 
 		$instance               = $old_instance;
 		$instance['title']      = strip_tags( $new_instance['title'] );
-		$instance['type']       = $new_instance['type'];
-		$instance['order']      = $new_instance['order'];
-		$instance['limit']      = $new_instance['limit'];
+		$instance['groups_of']   = strip_tags( $new_instance['groups_of'] );
+		$instance['type']       = strip_tags( $new_instance['type'] );
+		$instance['order']      = strip_tags( $new_instance['order'] );
+		$instance['limit']      = strip_tags( $new_instance['limit'] );
 		$instance['list_type']  = $new_instance['list_type'];
 
 		return $instance;
@@ -187,7 +187,7 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 
 		$defaults = array(
 			'title'     => __( 'Your Groups', 'bp-extended-user-groups-widget' ),
-			'group_of'  => 'loggedin',
+			'groups_of'  => 'loggedin',
 			'list_type' => 'member',
 			'type'      => 'active',
 			'order'     => 'ASC',
@@ -197,7 +197,7 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 		$instance = wp_parse_args( (array) $instance, $defaults );
 
 		$title      = strip_tags( $instance['title'] );
-		$group_of      = strip_tags( $instance['group_of'] );
+		$groups_of  = strip_tags( $instance['groups_of'] );
 		$limit      = strip_tags( $instance['limit'] );
 		$type       = strip_tags( $instance['type'] );
 		$order      = strip_tags( $instance['order'] );
@@ -212,14 +212,14 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 		</p>
 
 		<p>
-			<label for="<?php echo $this->get_field_id( 'group_of' ); ?>">
+			<label for="<?php echo $this->get_field_id( 'groups_of' ); ?>">
 				<?php _e( 'List Groups of: ', 'bp-extended-user-groups-widget' ); ?>
 			</label>
 			<label>
-				<input name="<?php echo $this->get_field_name( 'group_of' ); ?>" type="radio" value="loggedin" <?php checked( $group_of, 'loggedin' ); ?> /> <?php _e( 'LoggedIn User', 'bp-extended-user-groups-widget' );?>
+				<input name="<?php echo $this->get_field_name( 'groups_of' ); ?>" type="radio" value="loggedin" <?php checked( $groups_of, 'loggedin' ); ?> /> <?php _e( 'LoggedIn User', 'bp-extended-user-groups-widget' );?>
 			</label>
 			<label>
-				<input name="<?php echo $this->get_field_name( 'group_of' ); ?>" type="radio" value="displayed" <?php checked( $group_of, 'displayed' ); ?> /> <?php _e( 'Displayed User', 'bp-extended-user-groups-widget'); ?>
+				<input name="<?php echo $this->get_field_name( 'groups_of' ); ?>" type="radio" value="displayed" <?php checked( $groups_of, 'displayed' ); ?> /> <?php _e( 'Displayed User', 'bp-extended-user-groups-widget'); ?>
 			</label>
 		</p>
 
