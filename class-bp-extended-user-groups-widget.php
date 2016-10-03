@@ -53,8 +53,6 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 			if ( ! $user_id ) {
 				return '';
 			}
-
-			$instance['title'] = __( ucfirst( bp_get_displayed_user_username() ) . ' Groups', 'bp-extented-user-groups-widget' );
 		}
 
 		$title = apply_filters( 'widget_title', $instance['title'], $instance, $this->id_base );
