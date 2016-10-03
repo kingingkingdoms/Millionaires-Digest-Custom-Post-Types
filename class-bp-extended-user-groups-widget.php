@@ -24,7 +24,7 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 
 	public function widget( $args, $instance ) {
 
-		$user_id   = wp_get_current_user();
+		$user_id   = get_current_user_id();
 		//don't show to non logged in user if is not BuddyPress user page
 
 		$defaults = array(
