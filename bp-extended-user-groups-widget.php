@@ -4,12 +4,15 @@
  * Plugin URI: https://buddydev.com/plugins/bp-extended-user-groups-widget/
  * Version: 1.0.3
  * Description: Flexible group listing for BuddyPress user groups
- * Author: Ravi Sharma, BuddyDev
+ * Author: BuddyDev Team
  * Author URI: https://buddydev.com/
  * License: GPL
  *
  * */
 
+/**
+ * Contributor Name: Ravi Sharma, Brajesh Singh
+ */
 
 // exit if file access directly
 if ( ! defined( 'ABSPATH' ) ) {
