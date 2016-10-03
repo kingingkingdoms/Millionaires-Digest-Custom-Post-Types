@@ -9,6 +9,16 @@
  * License: GPL
  *
  * */
+
+
+// exit if file access directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Class BP_Extended_User_Groups_Widget_Helper
+ */
 Class BP_Extended_User_Groups_Widget_Helper {
     
     private static $instance;
