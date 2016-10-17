@@ -86,7 +86,7 @@ class BP_Extended_User_Groups_Widget extends WP_Widget {
 
 		}
 		$group_args['show_hidden'] = true;//show hidden groups too
-
+		$group_args['user_id'] = $user_id;
 		?>
 
 		<?php if ( bp_has_groups( $group_args ) ) : ?>
