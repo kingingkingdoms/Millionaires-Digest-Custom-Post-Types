@@ -10,19 +10,15 @@
  *
  * */
 
-/**
- * Contributor Name: Ravi Sharma, Brajesh Singh
- */
-
 // exit if file access directly
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * Class Jetpack_Cpt
+ * Class Millionairesdigest_Jetpack_Cpt
  */
-Class Jetpack_Cpt {
+Class Millionairesdigest_Jetpack_Cpt {
     
     private static $instance;
     private $path;
@@ -70,7 +66,7 @@ Class Jetpack_Cpt {
     }
 
 }
-Jetpack_Cpt::get_instance();
+Millionairesdigest_Jetpack_Cpt::get_instance();
 
 
 
