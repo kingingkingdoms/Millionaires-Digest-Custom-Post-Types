@@ -569,7 +569,7 @@ class Jetpack_Article {
 		$article_index_number = 0;
 		ob_start();
 		// If we have posts, create the html
-		// with harticle markup
+		// with article markup
 		if ( $query->have_posts() ) {
 			// Render styles
 			//self::themecolor_styles();
