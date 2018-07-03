@@ -20,9 +20,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Class BP_Extended_User_Groups_Widget_Helper
+ * Class Jetpack_Cpt
  */
-Class BP_Extended_User_Groups_Widget_Helper {
+Class Jetpack_Cpt {
     
     private static $instance;
     private $path;
@@ -76,7 +76,7 @@ Class BP_Extended_User_Groups_Widget_Helper {
     }
 
 }
-BP_Extended_User_Groups_Widget_Helper::get_instance();
+Jetpack_Cpt::get_instance();
 
 
 
