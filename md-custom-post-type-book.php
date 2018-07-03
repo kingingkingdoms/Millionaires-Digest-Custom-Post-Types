@@ -626,7 +626,7 @@ class Jetpack_Book {
 		$book_index_number = 0;
 		ob_start();
 		// If we have posts, create the html
-		// with hbook markup
+		// with book markup
 		if ( $query->have_posts() ) {
 			// Render styles
 			//self::themecolor_styles();
