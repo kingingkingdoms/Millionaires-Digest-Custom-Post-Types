@@ -41,9 +41,8 @@ Class Millionairesdigest_Jetpack_Cpt {
     
     private function setup() {
 
-        add_action( 'bp_loaded', array( $this, 'load' ) );
-        add_action( 'bp_widgets_init', array( $this, 'register_widget' ), 10 );
-        add_action( 'bp_init', array( $this, 'load_text_domain' ) );
+        add_action( 'plugins_loaded', array( $this, 'load' ) );
+        add_action( 'init', array( $this, 'load_text_domain' ) );
 
     }
 
@@ -52,7 +51,7 @@ Class Millionairesdigest_Jetpack_Cpt {
      */
     public function load() {
 
-        require_once $this->path . 'jetpack-cpt-book.php';
+        require_once $this->path . 'millionairesdigest-custom-post-type-book.php';
 
     }
 
