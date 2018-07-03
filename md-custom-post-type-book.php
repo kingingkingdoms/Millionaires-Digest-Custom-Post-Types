@@ -16,7 +16,7 @@ class Jetpack_Book {
 	const CUSTOM_POST_TYPE       = 'jetpack-book';
 	const CUSTOM_TAXONOMY_TYPE   = 'jetpack-book-type';
 	const CUSTOM_TAXONOMY_TAG    = 'jetpack-book-tag';
-	const OPTION_NAME            = 'jetpack_pbook';
+	const OPTION_NAME            = 'jetpack_book';
 	const OPTION_READING_SETTING = 'jetpack_book_posts_per_page';
 	public $version = '0.1';
 	static function init() {
