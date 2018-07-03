@@ -1,7 +1,6 @@
 <?php
 
 /* Plugin Name: Millionaire's Digest Custom Post Types
- * Plugin URI: https://millionairedigest.com/
  * Version: 1.0.0
  * Description: Add custom post types through Jetpack specifically created for the Millionaire's Digest.
  * Author: K&L
