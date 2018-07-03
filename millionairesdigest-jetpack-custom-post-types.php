@@ -1,11 +1,11 @@
 <?php
 
-/* Plugin Name: BuddyPress Extended User Groups Widget
- * Plugin URI: https://buddydev.com/plugins/bp-extended-user-groups-widget/
- * Version: 1.0.3
- * Description: Flexible group listing for BuddyPress user groups
- * Author: BuddyDev Team
- * Author URI: https://buddydev.com/
+/* Plugin Name: Millionaire's Digest Custom Post Types
+ * Plugin URI: https://millionairedigest.com/
+ * Version: 1.0.0
+ * Description: Add custom post types through Jetpack specifically created for the Millionaire's Digest.
+ * Author: K&L
+ * Author URI: https://millionairedigest.com/
  * License: GPL
  *
  * */
