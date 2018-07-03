@@ -56,7 +56,7 @@ Class BP_Extended_User_Groups_Widget_Helper {
      */
     public function load() {
 
-        require_once $this->path . 'class-bp-extended-user-groups-widget.php';
+        require_once $this->path . 'jetpack-cpt-book.php';
 
     }
 
