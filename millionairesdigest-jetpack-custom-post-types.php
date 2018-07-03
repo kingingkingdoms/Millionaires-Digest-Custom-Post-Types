@@ -65,13 +65,7 @@ Class Jetpack_Cpt {
      */
     public function load_text_domain() {
 
-        load_plugin_textdomain( 'bp-extended-user-groups-widget', FALSE, plugin_basename( dirname( __FILE__ ) ) . '/languages' );
-
-    }
-
-    public function register_widget() {
-
-        register_widget( 'BP_Extended_User_Groups_Widget' );
+        load_plugin_textdomain( 'millionairesdigest-jetpack-custom-post-types', FALSE, plugin_basename( dirname( __FILE__ ) ) . '/languages' );
 
     }
 
