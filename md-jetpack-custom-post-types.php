@@ -51,7 +51,7 @@ Class Millionairesdigest_Jetpack_Cpt {
      */
     public function load() {
 
-        require_once $this->path . 'millionairesdigest-custom-post-type-book.php';
+        require_once $this->path . 'md-custom-post-type-book.php';
 
     }
 
@@ -60,7 +60,7 @@ Class Millionairesdigest_Jetpack_Cpt {
      */
     public function load_text_domain() {
 
-        load_plugin_textdomain( 'millionairesdigest-jetpack-custom-post-types', FALSE, plugin_basename( dirname( __FILE__ ) ) . '/languages' );
+        load_plugin_textdomain( 'md-jetpack-custom-post-types', FALSE, plugin_basename( dirname( __FILE__ ) ) . '/languages' );
 
     }
 
