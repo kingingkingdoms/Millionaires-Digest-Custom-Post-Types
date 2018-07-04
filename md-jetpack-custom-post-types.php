@@ -50,7 +50,12 @@ Class Millionairesdigest_Jetpack_Cpt {
      */
     public function load() {
 
-        require_once $this->path . 'md-custom-post-type-book.php';
+        require_once $this->path . 'md-custom-post-type-article.php';
+	require_once $this->path . 'md-custom-post-type-video.php';
+	require_once $this->path . 'md-custom-post-type-photo.php';
+	require_once $this->path . 'md-custom-post-type-music.php';
+	require_once $this->path . 'md-custom-post-type-magazine-article.php';
+	require_once $this->path . 'md-custom-post-type-company.php';
 
     }
 
