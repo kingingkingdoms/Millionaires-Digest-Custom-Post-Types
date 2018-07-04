@@ -6,23 +6,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Add custom post type support "Book" to Jetpack
+ * Add custom post type support "Company" to Jetpack
  *
- * Class Jetpack_Book
+ * Class Jetpack_Company
  */
-class Jetpack_Book {
+class Jetpack_Company {
 	
 	
-	const CUSTOM_POST_TYPE       = 'jetpack-book';
-	const CUSTOM_TAXONOMY_TYPE   = 'jetpack-book-type';
-	const CUSTOM_TAXONOMY_TAG    = 'jetpack-book-tag';
-	const OPTION_NAME            = 'jetpack_book';
-	const OPTION_READING_SETTING = 'jetpack_book_posts_per_page';
+	const CUSTOM_POST_TYPE       = 'jetpack-company';
+	const CUSTOM_TAXONOMY_TYPE   = 'jetpack-company-type';
+	const CUSTOM_TAXONOMY_TAG    = 'jetpack-company-tag';
+	const OPTION_NAME            = 'jetpack_company';
+	const OPTION_READING_SETTING = 'jetpack_company_posts_per_page';
 	public $version = '0.1';
 	static function init() {
 		static $instance = false;
 		if ( ! $instance ) {
-			$instance = new Jetpack_Book;
+			$instance = new Jetpack_Company;
 		}
 		return $instance;
 	}
@@ -40,9 +40,9 @@ class Jetpack_Book {
 		// Make sure the post types are loaded for imports
 		add_action( 'import_start',                                                    array( $this, 'register_post_types' ) );
 		// Add to REST API post type whitelist
-		add_filter( 'rest_api_allowed_post_types',                                     array( $this, 'allow_book_rest_api_type' ) );
+		add_filter( 'rest_api_allowed_post_types',                                     array( $this, 'allow_company_rest_api_type' ) );
 		$setting = Jetpack_Options::get_option_and_ensure_autoload( self::OPTION_NAME, '0' );
-		// Bail early if Book option is not set and the theme doesn't declare support
+		// Bail early if Company option is not set and the theme doesn't declare support
 		if ( empty( $setting ) && ! $this->site_supports_custom_post_type() ) {
 			return;
 		}
@@ -50,7 +50,7 @@ class Jetpack_Book {
 		$this->register_post_types();
 		add_action( sprintf( 'add_option_%s', self::OPTION_NAME ),                     array( $this, 'flush_rules_on_enable' ), 10 );
 		add_action( sprintf( 'update_option_%s', self::OPTION_NAME ),                  array( $this, 'flush_rules_on_enable' ), 10 );
-		add_action( sprintf( 'publish_%s', self::CUSTOM_POST_TYPE),                    array( $this, 'flush_rules_on_first_book' ) );
+		add_action( sprintf( 'publish_%s', self::CUSTOM_POST_TYPE),                    array( $this, 'flush_rules_on_first_company' ) );
 		add_action( 'after_switch_theme',                                              array( $this, 'flush_rules_on_switch' ) );
 		// Admin Customization
 		add_filter( 'post_updated_messages',                                           array( $this, 'updated_messages'   ) );
@@ -61,13 +61,13 @@ class Jetpack_Book {
 			// Track all the things
 			add_action( sprintf( 'add_option_%s', self::OPTION_NAME ),                 array( $this, 'new_activation_stat_bump' ) );
 			add_action( sprintf( 'update_option_%s', self::OPTION_NAME ),              array( $this, 'update_option_stat_bump' ), 11, 2 );
-			add_action( sprintf( 'publish_%s', self::CUSTOM_POST_TYPE),                array( $this, 'new_book_stat_bump' ) );
+			add_action( sprintf( 'publish_%s', self::CUSTOM_POST_TYPE),                array( $this, 'new_company_stat_bump' ) );
 		}
-		add_image_size( 'jetpack-book-admin-thumb', 50, 50, true );
+		add_image_size( 'jetpack-company-admin-thumb', 50, 50, true );
 		add_action( 'admin_enqueue_scripts',                                           array( $this, 'enqueue_admin_styles'  ) );
-		// register jetpack_book shortcode and book shortcode (legacy)
-		add_shortcode( 'book',                                                    array( $this, 'book_shortcode' ) );
-		add_shortcode( 'jetpack_book',                                            array( $this, 'book_shortcode' ) );
+		// register jetpack_company shortcode and company shortcode (legacy)
+		add_shortcode( 'company',                                                    array( $this, 'company_shortcode' ) );
+		add_shortcode( 'jetpack_company',                                            array( $this, 'company_shortcode' ) );
 		// Adjust CPT archive and custom taxonomies to obey CPT reading setting
 		add_filter( 'infinite_scroll_settings',                                        array( $this, 'infinite_scroll_click_posts_per_page' ) );
 		add_filter( 'infinite_scroll_results',                                         array( $this, 'infinite_scroll_results' ), 10, 3 );
@@ -94,7 +94,7 @@ class Jetpack_Book {
 	function settings_api_init() {
 		add_settings_field(
 			self::OPTION_NAME,
-			'<span class="cpt-options">' . __( 'Books', 'jetpack' ) . '</span>',
+			'<span class="cpt-options">' . __( 'Company', 'jetpack' ) . '</span>',
 			array( $this, 'setting_html' ),
 			'writing',
 			'jetpack_cpt_section'
@@ -115,25 +115,25 @@ class Jetpack_Book {
 	}
 	/**
 	 * HTML code to display a checkbox true/false option
-	 * for the Book CPT setting.
+	 * for the Company CPT setting.
 	 *
 	 * @return html
 	 */
 	function setting_html() {
 		if ( current_theme_supports( self::CUSTOM_POST_TYPE ) ) : ?>
-			<p><?php printf( /* translators: %s is the name of a custom post type such as "jetpack-book" */ __( 'Your theme supports <strong>%s</strong>', 'jetpack' ), self::CUSTOM_POST_TYPE ); ?></p>
+			<p><?php printf( /* translators: %s is the name of a custom post type such as "jetpack-company" */ __( 'Your theme supports <strong>%s</strong>', 'jetpack' ), self::CUSTOM_POST_TYPE ); ?></p>
 		<?php else : ?>
 			<label for="<?php echo esc_attr( self::OPTION_NAME ); ?>">
 				<input name="<?php echo esc_attr( self::OPTION_NAME ); ?>" id="<?php echo esc_attr( self::OPTION_NAME ); ?>" <?php echo checked( get_option( self::OPTION_NAME, '0' ), true, false ); ?> type="checkbox" value="1" />
-				<?php esc_html_e( 'Enable Books for this site.', 'jetpack' ); ?>
-				<a target="_blank" href="http://en.support.wordpress.com/books/"><?php esc_html_e( 'Learn More', 'jetpack' ); ?></a>
+				<?php esc_html_e( 'Enable Company for this site.', 'jetpack' ); ?>
+				<a target="_blank" href="http://en.support.wordpress.com/company/"><?php esc_html_e( 'Learn More', 'jetpack' ); ?></a>
 			</label>
 		<?php endif;
 		if ( get_option( self::OPTION_NAME, '0' ) || current_theme_supports( self::CUSTOM_POST_TYPE ) ) :
 			printf( '<p><label for="%1$s">%2$s</label></p>',
 				esc_attr( self::OPTION_READING_SETTING ),
 				/* translators: %1$s is replaced with an input field for numbers */
-				sprintf( __( 'Book pages display at most %1$s books', 'jetpack' ),
+				sprintf( __( 'Company pages display at most %1$s posts', 'jetpack' ),
 					sprintf( '<input name="%1$s" id="%1$s" type="number" step="1" min="1" value="%2$s" class="small-text" />',
 						esc_attr( self::OPTION_READING_SETTING ),
 						esc_attr( get_option( self::OPTION_READING_SETTING, '10' ) )
@@ -143,27 +143,27 @@ class Jetpack_Book {
 		endif;
 	}
 	/*
-	 * Bump Book > New Activation stat
+	 * Bump Company > New Activation stat
 	 */
 	function new_activation_stat_bump() {
-		bump_stats_extras( 'books', 'new-activation' );
+		bump_stats_extras( 'company', 'new-activation' );
 	}
 	/*
-	 * Bump Book > Option On/Off stats to get total active
+	 * Bump Company > Option On/Off stats to get total active
 	 */
 	function update_option_stat_bump( $old, $new ) {
 		if ( empty( $old ) && ! empty( $new ) ) {
-			bump_stats_extras( 'books', 'option-on' );
+			bump_stats_extras( 'company', 'option-on' );
 		}
 		if ( ! empty( $old ) && empty( $new ) ) {
-			bump_stats_extras( 'books', 'option-off' );
+			bump_stats_extras( 'company', 'option-off' );
 		}
 	}
 	/*
-	 * Bump Book > Published Books stat when books are published
+	 * Bump Company > Published Company stat when Company are published
 	 */
-	function new_book_stat_bump() {
-		bump_stats_extras( 'books', 'published-books' );
+	function new_company_stat_bump() {
+		bump_stats_extras( 'company', 'published-company' );
 	}
 	/**
 	* Should this Custom Post Type be made available?
@@ -184,15 +184,15 @@ class Jetpack_Book {
 		flush_rewrite_rules();
 	}
 	/*
-	 * Count published books and flush permalinks when first books is published
+	 * Count published company and flush permalinks when first company is published
 	 */
-	function flush_rules_on_first_book() {
-		$books = get_transient( 'jetpack-book-count-cache' );
-		if ( false === $books ) {
+	function flush_rules_on_first_company() {
+		$company = get_transient( 'jetpack-company-count-cache' );
+		if ( false === $company ) {
 			flush_rewrite_rules();
-			$books = (int) wp_count_posts( self::CUSTOM_POST_TYPE )->publish;
-			if ( ! empty( $books ) ) {
-				set_transient( 'jetpack-book-count-cache', $books, HOUR_IN_SECONDS * 12 );
+			$company = (int) wp_count_posts( self::CUSTOM_POST_TYPE )->publish;
+			if ( ! empty( $company ) ) {
+				set_transient( 'jetpack-company-count-cache', $company, HOUR_IN_SECONDS * 12 );
 			}
 		}
 	}
@@ -216,13 +216,13 @@ class Jetpack_Book {
 	 * On theme switch, check if CPT item exists and disable if not
 	 */
 	function deactivation_post_type_support() {
-		$books = get_posts( array(
+		$company = get_posts( array(
 			'fields'           => 'ids',
 			'posts_per_page'   => 1,
 			'post_type'        => self::CUSTOM_POST_TYPE,
 			'suppress_filters' => false
 		) );
-		if ( empty( $books ) ) {
+		if ( empty( $company ) ) {
 			update_option( self::OPTION_NAME, '0' );
 		}
 	}
@@ -234,23 +234,23 @@ class Jetpack_Book {
 			return;
 		}
 		register_post_type( self::CUSTOM_POST_TYPE, array(
-			'description' => __( 'Book Items', 'jetpack' ),
+			'description' => __( 'Company Items', 'jetpack' ),
 			'labels' => array(
-				'name'                  => esc_html__( 'Books',                   'jetpack' ),
-				'singular_name'         => esc_html__( 'Book',                    'jetpack' ),
-				'menu_name'             => esc_html__( 'Books',                  'jetpack' ),
-				'all_items'             => esc_html__( 'All Books',               'jetpack' ),
+				'name'                  => esc_html__( 'Articles',                   'jetpack' ),
+				'singular_name'         => esc_html__( 'Article',                    'jetpack' ),
+				'menu_name'             => esc_html__( 'Company',                  'jetpack' ),
+				'all_items'             => esc_html__( 'All Articles',               'jetpack' ),
 				'add_new'               => esc_html__( 'Add New',                    'jetpack' ),
-				'add_new_item'          => esc_html__( 'Add New Book',            'jetpack' ),
-				'edit_item'             => esc_html__( 'Edit Book',               'jetpack' ),
-				'new_item'              => esc_html__( 'New Book',                'jetpack' ),
-				'view_item'             => esc_html__( 'View Book',               'jetpack' ),
-				'search_items'          => esc_html__( 'Search Books',            'jetpack' ),
-				'not_found'             => esc_html__( 'No Books found',          'jetpack' ),
-				'not_found_in_trash'    => esc_html__( 'No Books found in Trash', 'jetpack' ),
-				'filter_items_list'     => esc_html__( 'Filter books list',       'jetpack' ),
-				'items_list_navigation' => esc_html__( 'Book list navigation',    'jetpack' ),
-				'items_list'            => esc_html__( 'Books list',              'jetpack' ),
+				'add_new_item'          => esc_html__( 'Add New Article',            'jetpack' ),
+				'edit_item'             => esc_html__( 'Edit Article',               'jetpack' ),
+				'new_item'              => esc_html__( 'New Article',                'jetpack' ),
+				'view_item'             => esc_html__( 'View Article',               'jetpack' ),
+				'search_items'          => esc_html__( 'Search Articles',            'jetpack' ),
+				'not_found'             => esc_html__( 'No Articles found',          'jetpack' ),
+				'not_found_in_trash'    => esc_html__( 'No Articles found in Trash', 'jetpack' ),
+				'filter_items_list'     => esc_html__( 'Filter articles list',       'jetpack' ),
+				'items_list_navigation' => esc_html__( 'Article list navigation',    'jetpack' ),
+				'items_list'            => esc_html__( 'Articles list',              'jetpack' ),
 			),
 			'supports' => array(
 				'title',
@@ -264,7 +264,7 @@ class Jetpack_Book {
 				'excerpt',
 			),
 			'rewrite' => array(
-				'slug'       => 'book',
+				'slug'       => 'company',
 				'with_front' => false,
 				'feeds'      => true,
 				'pages'      => true,
@@ -288,26 +288,26 @@ class Jetpack_Book {
 			
 			'taxonomies'      => array( self::CUSTOM_TAXONOMY_TYPE, self::CUSTOM_TAXONOMY_TAG ),
 			'has_archive'     => true,
-			'query_var'       => 'book',
+			'query_var'       => 'company',
 			'show_in_rest'    => true,
 		) );
 		register_taxonomy( self::CUSTOM_TAXONOMY_TYPE, self::CUSTOM_POST_TYPE, array(
 			'hierarchical'      => true,
 			'labels'            => array(
-				'name'                  => esc_html__( 'Book Categories',                 'jetpack' ),
-				'singular_name'         => esc_html__( 'Book Category',                  'jetpack' ),
-				'menu_name'             => esc_html__( 'Book Categories',                 'jetpack' ),
-				'all_items'             => esc_html__( 'All Book Categories',             'jetpack' ),
-				'edit_item'             => esc_html__( 'Edit Book Category',             'jetpack' ),
-				'view_item'             => esc_html__( 'View Book Category',             'jetpack' ),
-				'update_item'           => esc_html__( 'Update Book Category',           'jetpack' ),
-				'add_new_item'          => esc_html__( 'Add New Book Category',          'jetpack' ),
-				'new_item_name'         => esc_html__( 'New Book Category Name',         'jetpack' ),
-				'parent_item'           => esc_html__( 'Parent Book Category',           'jetpack' ),
-				'parent_item_colon'     => esc_html__( 'Parent Book Category:',          'jetpack' ),
-				'search_items'          => esc_html__( 'Search Book Categories',          'jetpack' ),
-				'items_list_navigation' => esc_html__( 'Book category list navigation',  'jetpack' ),
-				'items_list'            => esc_html__( 'Book category list',             'jetpack' ),
+				'name'                  => esc_html__( 'Company Categories',                 'jetpack' ),
+				'singular_name'         => esc_html__( 'Company Category',                  'jetpack' ),
+				'menu_name'             => esc_html__( 'Company Categories',                 'jetpack' ),
+				'all_items'             => esc_html__( 'All Company Categories',             'jetpack' ),
+				'edit_item'             => esc_html__( 'Edit Company Category',             'jetpack' ),
+				'view_item'             => esc_html__( 'View Company Category',             'jetpack' ),
+				'update_item'           => esc_html__( 'Update Company Category',           'jetpack' ),
+				'add_new_item'          => esc_html__( 'Add New Company Category',          'jetpack' ),
+				'new_item_name'         => esc_html__( 'New Company Category Name',         'jetpack' ),
+				'parent_item'           => esc_html__( 'Parent Company Category',           'jetpack' ),
+				'parent_item_colon'     => esc_html__( 'Parent Company Category:',          'jetpack' ),
+				'search_items'          => esc_html__( 'Search Company Categories',          'jetpack' ),
+				'items_list_navigation' => esc_html__( 'Company category list navigation',  'jetpack' ),
+				'items_list'            => esc_html__( 'Company category list',             'jetpack' ),
 			),
 			'public'            => true,
 			'show_ui'           => true,
@@ -315,28 +315,28 @@ class Jetpack_Book {
 			'show_in_rest'      => true,
 			'show_admin_column' => true,
 			'query_var'         => true,
-			'rewrite'           => array( 'slug' => 'book-category' ),
+			'rewrite'           => array( 'slug' => 'company-category' ),
 		) );
 		register_taxonomy( self::CUSTOM_TAXONOMY_TAG, self::CUSTOM_POST_TYPE, array(
 			'hierarchical'      => false,
 			'labels'            => array(
-				'name'                       => esc_html__( 'Book Tags',                   'jetpack' ),
-				'singular_name'              => esc_html__( 'Book Tag',                    'jetpack' ),
-				'menu_name'                  => esc_html__( 'Book Tags',                   'jetpack' ),
-				'all_items'                  => esc_html__( 'All Book Tags',               'jetpack' ),
-				'edit_item'                  => esc_html__( 'Edit Book Tag',               'jetpack' ),
-				'view_item'                  => esc_html__( 'View Book Tag',               'jetpack' ),
-				'update_item'                => esc_html__( 'Update Book Tag',             'jetpack' ),
-				'add_new_item'               => esc_html__( 'Add New Book Tag',            'jetpack' ),
-				'new_item_name'              => esc_html__( 'New Book Tag Name',           'jetpack' ),
-				'search_items'               => esc_html__( 'Search Book Tags',            'jetpack' ),
-				'popular_items'              => esc_html__( 'Popular Book Tags',           'jetpack' ),
+				'name'                       => esc_html__( 'Company Tags',                   'jetpack' ),
+				'singular_name'              => esc_html__( 'Company Tag',                    'jetpack' ),
+				'menu_name'                  => esc_html__( 'Company Tags',                   'jetpack' ),
+				'all_items'                  => esc_html__( 'All Company Tags',               'jetpack' ),
+				'edit_item'                  => esc_html__( 'Edit Company Tag',               'jetpack' ),
+				'view_item'                  => esc_html__( 'View Company Tag',               'jetpack' ),
+				'update_item'                => esc_html__( 'Update Company Tag',             'jetpack' ),
+				'add_new_item'               => esc_html__( 'Add New Company Tag',            'jetpack' ),
+				'new_item_name'              => esc_html__( 'New Company Tag Name',           'jetpack' ),
+				'search_items'               => esc_html__( 'Search Company Tags',            'jetpack' ),
+				'popular_items'              => esc_html__( 'Popular Company Tags',           'jetpack' ),
 				'separate_items_with_commas' => esc_html__( 'Separate tags with commas',      'jetpack' ),
 				'add_or_remove_items'        => esc_html__( 'Add or remove tags',             'jetpack' ),
 				'choose_from_most_used'      => esc_html__( 'Choose from the most used tags', 'jetpack' ),
 				'not_found'                  => esc_html__( 'No tags found.',                 'jetpack' ),
-				'items_list_navigation'      => esc_html__( 'Book tag list navigation',    'jetpack' ),
-				'items_list'                 => esc_html__( 'Book tag list',               'jetpack' ),
+				'items_list_navigation'      => esc_html__( 'Company tag list navigation',    'jetpack' ),
+				'items_list'                 => esc_html__( 'Company tag list',               'jetpack' ),
 			),
 			'public'            => true,
 			'show_ui'           => true,
@@ -344,29 +344,29 @@ class Jetpack_Book {
 			'show_in_rest'      => true,
 			'show_admin_column' => true,
 			'query_var'         => true,
-			'rewrite'           => array( 'slug' => 'book-tag' ),
+			'rewrite'           => array( 'slug' => 'company-tag' ),
 		) );
 	}
 	/**
-	 * Update messages for the Book admin.
+	 * Update messages for the Company admin.
 	 */
 	function updated_messages( $messages ) {
 		global $post;
 		$messages[self::CUSTOM_POST_TYPE] = array(
 			0  => '', // Unused. Messages start at index 1.
-			1  => sprintf( __( 'Book updated. <a href="%s">View item</a>', 'jetpack'), esc_url( get_permalink( $post->ID ) ) ),
+			1  => sprintf( __( 'Article updated. <a href="%s">View item</a>', 'jetpack'), esc_url( get_permalink( $post->ID ) ) ),
 			2  => esc_html__( 'Custom field updated.', 'jetpack' ),
 			3  => esc_html__( 'Custom field deleted.', 'jetpack' ),
-			4  => esc_html__( 'Book updated.', 'jetpack' ),
+			4  => esc_html__( 'Article updated.', 'jetpack' ),
 			/* translators: %s: date and time of the revision */
-			5  => isset( $_GET['revision'] ) ? sprintf( esc_html__( 'Book restored to revision from %s', 'jetpack'), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-			6  => sprintf( __( 'Book published. <a href="%s">View book</a>', 'jetpack' ), esc_url( get_permalink( $post->ID ) ) ),
-			7  => esc_html__( 'Book saved.', 'jetpack' ),
-			8  => sprintf( __( 'Book submitted. <a target="_blank" href="%s">Preview book</a>', 'jetpack'), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) ),
-			9  => sprintf( __( 'Book scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview book</a>', 'jetpack' ),
+			5  => isset( $_GET['revision'] ) ? sprintf( esc_html__( 'Article restored to revision from %s', 'jetpack'), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+			6  => sprintf( __( 'Article published. <a href="%s">View article</a>', 'jetpack' ), esc_url( get_permalink( $post->ID ) ) ),
+			7  => esc_html__( 'Article saved.', 'jetpack' ),
+			8  => sprintf( __( 'Article submitted. <a target="_blank" href="%s">Preview article</a>', 'jetpack'), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) ),
+			9  => sprintf( __( 'Article scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview article</a>', 'jetpack' ),
 			// translators: Publish box date format, see http://php.net/date
 			date_i18n( __( 'M j, Y @ G:i', 'jetpack' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post->ID ) ) ),
-			10 => sprintf( __( 'Book item draft updated. <a target="_blank" href="%s">Preview book</a>', 'jetpack' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) ),
+			10 => sprintf( __( 'Article item draft updated. <a target="_blank" href="%s">Preview article</a>', 'jetpack' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) ),
 		);
 		return $messages;
 	}
@@ -375,10 +375,10 @@ class Jetpack_Book {
 	 * Add Featured Image column
 	 */
 	function edit_admin_columns( $columns ) {
-		// change 'Title' to 'Book'
-		$columns['title'] = __( 'Book', 'jetpack' );
+		// change 'Title' to 'Company'
+		$columns['title'] = __( 'Company Article', 'jetpack' );
 		if ( current_theme_supports( 'post-thumbnails' ) ) {
-			// add featured image before 'Book'
+			// add featured image before 'Company'
 			$columns = array_slice( $columns, 0, 1, true ) + array( 'thumbnail' => '' ) + array_slice( $columns, 1, NULL, true );
 		}
 		return $columns;
@@ -390,7 +390,7 @@ class Jetpack_Book {
 		global $post;
 		switch ( $column ) {
 			case 'thumbnail':
-				echo get_the_post_thumbnail( $post_id, 'jetpack-book-admin-thumb' );
+				echo get_the_post_thumbnail( $post_id, 'jetpack-company-admin-thumb' );
 				break;
 		}
 	}
@@ -404,55 +404,55 @@ class Jetpack_Book {
 		}
 	}
 	/**
-	 * Adds book section to the Customizer.
+	 * Adds company section to the Customizer.
 	 */
 	function customize_register( $wp_customize ) {
 		$options = get_theme_support( self::CUSTOM_POST_TYPE );
 		if ( ( ! isset( $options[0]['title'] ) || true !== $options[0]['title'] ) && ( ! isset( $options[0]['content'] ) || true !== $options[0]['content'] ) && ( ! isset( $options[0]['featured-image'] ) || true !== $options[0]['featured-image'] ) ) {
 			return;
 		}
-		$wp_customize->add_section( 'jetpack_book', array(
-			'title'                    => esc_html__( 'Book', 'jetpack' ),
+		$wp_customize->add_section( 'jetpack_company', array(
+			'title'                    => esc_html__( 'Company Article', 'jetpack' ),
 			'theme_supports'           => self::CUSTOM_POST_TYPE,
 			'priority'                 => 130,
 		) );
 		if ( isset( $options[0]['title'] ) && true === $options[0]['title'] ) {
-			$wp_customize->add_setting( 'jetpack_book_title', array(
-				'default'              => esc_html__( 'Books', 'jetpack' ),
+			$wp_customize->add_setting( 'jetpack_company_title', array(
+				'default'              => esc_html__( 'Company Articles', 'jetpack' ),
 				'type'                 => 'option',
 				'sanitize_callback'    => 'sanitize_text_field',
 				'sanitize_js_callback' => 'sanitize_text_field',
 			) );
-			$wp_customize->add_control( 'jetpack_book_title', array(
-				'section'              => 'jetpack_book',
-				'label'                => esc_html__( 'Book Archive Title', 'jetpack' ),
+			$wp_customize->add_control( 'jetpack_company_title', array(
+				'section'              => 'jetpack_company',
+				'label'                => esc_html__( 'Company Article Archive Title', 'jetpack' ),
 				'type'                 => 'text',
 			) );
 		}
 		if ( isset( $options[0]['content'] ) && true === $options[0]['content'] ) {
-			$wp_customize->add_setting( 'jetpack_book_content', array(
+			$wp_customize->add_setting( 'jetpack_company_content', array(
 				'default'              => '',
 				'type'                 => 'option',
 				'sanitize_callback'    => 'wp_kses_post',
 				'sanitize_js_callback' => 'wp_kses_post',
 			) );
-			$wp_customize->add_control( 'jetpack_book_content', array(
-				'section'              => 'jetpack_book',
-				'label'                => esc_html__( 'Book Archive Content', 'jetpack' ),
+			$wp_customize->add_control( 'jetpack_company_content', array(
+				'section'              => 'jetpack_company',
+				'label'                => esc_html__( 'Company Article Archive Content', 'jetpack' ),
 				'type'                 => 'textarea',
 			) );
 		}
 		if ( isset( $options[0]['featured-image'] ) && true === $options[0]['featured-image'] ) {
-			$wp_customize->add_setting( 'jetpack_book_featured_image', array(
+			$wp_customize->add_setting( 'jetpack_company_featured_image', array(
 				'default'              => '',
 				'type'                 => 'option',
 				'sanitize_callback'    => 'attachment_url_to_postid',
 				'sanitize_js_callback' => 'attachment_url_to_postid',
 				'theme_supports'       => 'post-thumbnails',
 			) );
-			$wp_customize->add_control( new WP_Customize_Image_Control( $wp_customize, 'jetpack_book_featured_image', array(
-				'section'              => 'jetpack_book',
-				'label'                => esc_html__( 'Book Archive Featured Image', 'jetpack' ),
+			$wp_customize->add_control( new WP_Customize_Image_Control( $wp_customize, 'jetpack_company_featured_image', array(
+				'section'              => 'jetpack_company',
+				'label'                => esc_html__( 'Company Article Archive Featured Image', 'jetpack' ),
 			) ) );
 		}
 	}
@@ -501,17 +501,17 @@ class Jetpack_Book {
 	/**
 	 * Add to REST API post type whitelist
 	 */
-	function allow_book_rest_api_type( $post_types ) {
+	function allow_company_rest_api_type( $post_types ) {
 		$post_types[] = self::CUSTOM_POST_TYPE;
 		return $post_types;
 	}
 	/**
-	 * Our [book] shortcode.
-	 * Prints Book data styled to look good on *any* theme.
+	 * Our [company] shortcode.
+	 * Prints Company data styled to look good on *any* theme.
 	 *
-	 * @return book_shortcode_html
+	 * @return company_shortcode_html
 	 */
-	static function book_shortcode( $atts ) {
+	static function company_shortcode( $atts ) {
 		// Default attributes
 		$atts = shortcode_atts( array(
 			'display_types'   => true,
@@ -525,7 +525,7 @@ class Jetpack_Book {
 			'showposts'       => -1,
 			'order'           => 'asc',
 			'orderby'         => 'date',
-		), $atts, 'book' );
+		), $atts, 'company' );
 		// A little sanitization
 		if ( $atts['display_types'] && 'true' != $atts['display_types'] ) {
 			$atts['display_types'] = false;
@@ -559,7 +559,7 @@ class Jetpack_Book {
 			$atts['orderby'] = strtolower( $atts['orderby'] );
 			$allowed_keys = array( 'author', 'date', 'title', 'rand' );
 			$parsed = array();
-			foreach ( explode( ',', $atts['orderby'] ) as $book_index_number => $orderby ) {
+			foreach ( explode( ',', $atts['orderby'] ) as $company_index_number => $orderby ) {
 				if ( ! in_array( $orderby, $allowed_keys ) ) {
 					continue;
 				}
@@ -572,15 +572,15 @@ class Jetpack_Book {
 			}
 		}
 		// enqueue shortcode styles when shortcode is used
-		wp_enqueue_style( 'jetpack-book-style', plugins_url( 'css/portfolio-shortcode.css', __FILE__ ), array(), '20140326' );
-		return self::book_shortcode_html( $atts );
+		wp_enqueue_style( 'jetpack-company-style', plugins_url( 'css/portfolio-shortcode.css', __FILE__ ), array(), '20140326' );
+		return self::company_shortcode_html( $atts );
 	}
 	/**
-	 * Query to retrieve entries from the Book post_type.
+	 * Query to retrieve entries from the Company post_type.
 	 *
 	 * @return object
 	 */
-	static function book_query( $atts ) {
+	static function company_query( $atts ) {
 		// Default query arguments
 		$default = array(
 			'order'          => $atts['order'],
@@ -616,47 +616,47 @@ class Jetpack_Book {
 		return $query;
 	}
 	/**
-	 * The Book shortcode loop.
+	 * The Company shortcode loop.
 	 *
 	 * @todo add theme color styles
 	 * @return html
 	 */
-	static function book_shortcode_html( $atts ) {
-		$query = self::book_query( $atts );
-		$book_index_number = 0;
+	static function company_shortcode_html( $atts ) {
+		$query = self::company_query( $atts );
+		$company_index_number = 0;
 		ob_start();
 		// If we have posts, create the html
-		// with book markup
+		// with company markup
 		if ( $query->have_posts() ) {
 			// Render styles
 			//self::themecolor_styles();
 		?>
-			<div class="jetpack-book-shortcode column-<?php echo esc_attr( $atts['columns'] ); ?>">
-			<?php  // open .jetpack-book
+			<div class="jetpack-company-shortcode column-<?php echo esc_attr( $atts['columns'] ); ?>">
+			<?php  // open .jetpack-company
 			// Construct the loop...
 			while ( $query->have_posts() ) {
 				$query->the_post();
 				$post_id = get_the_ID();
 				?>
-				<div class="book-entry <?php echo esc_attr( self::get_book_class( $book_index_number, $atts['columns'] ) ); ?>">
-					<header class="book-entry-header">
+				<div class="company-entry <?php echo esc_attr( self::get_company_class( $company_index_number, $atts['columns'] ) ); ?>">
+					<header class="company-entry-header">
 					<?php
 					// Featured image
-					echo self::get_book_thumbnail_link( $post_id );
+					echo self::get_company_thumbnail_link( $post_id );
 					?>
 
-					<h2 class="book-entry-title"><a href="<?php echo esc_url( get_permalink() ); ?>" title="<?php echo esc_attr( the_title_attribute( ) ); ?>"><?php the_title(); ?></a></h2>
+					<h2 class="company-entry-title"><a href="<?php echo esc_url( get_permalink() ); ?>" title="<?php echo esc_attr( the_title_attribute( ) ); ?>"><?php the_title(); ?></a></h2>
 
-						<div class="book-entry-meta">
+						<div class="company-entry-meta">
 						<?php
 						if ( false != $atts['display_types'] ) {
-							echo self::get_book_type( $post_id );
+							echo self::get_company_type( $post_id );
 						}
 						if ( false != $atts['display_tags'] ) {
-							echo self::get_book_tags( $post_id );
+							echo self::get_company_tags( $post_id );
 						}
 						if ( false != $atts['display_author'] ) {
-							echo self::get_book_author( $post_id );
+							echo self::get_company_author( $post_id );
 						}
 						?>
 						</div>
@@ -669,132 +669,132 @@ class Jetpack_Book {
 					add_filter( 'wordads_inpost_disable', '__return_true', 20 );
 					if ( 'full' === $atts['display_content'] ) {
 					?>
-						<div class="book-entry-content"><?php the_content(); ?></div>
+						<div class="company-entry-content"><?php the_content(); ?></div>
 					<?php
 					} else {
 					?>
-						<div class="book-entry-content"><?php the_excerpt(); ?></div>
+						<div class="company-entry-content"><?php the_excerpt(); ?></div>
 					<?php
 					}
 					remove_filter( 'wordads_inpost_disable', '__return_true', 20 );
 				}
 				?>
-				</div><!-- close .book-entry -->
-				<?php $book_index_number++;
+				</div><!-- close .company-entry -->
+				<?php $company_index_number++;
 			} // end of while loop
 			wp_reset_postdata();
 			?>
-			</div><!-- close .jetpack-book -->
+			</div><!-- close .jetpack-company -->
 		<?php
 		} else { ?>
-			<p><em><?php _e( 'Your Book Archive currently has no entries. You can start creating them on your dashboard.', 'jetpack' ); ?></p></em>
+			<p><em><?php _e( 'Your Company Archive currently has no entries. You can start creating them on your dashboard.', 'jetpack' ); ?></p></em>
 		<?php
 		}
 		$html = ob_get_clean();
-		// If there is a [book] within a [book], remove the shortcode
-		if ( has_shortcode( $html, 'book' ) ){
-			remove_shortcode( 'book' );
+		// If there is a [company] within a [company], remove the shortcode
+		if ( has_shortcode( $html, 'company' ) ){
+			remove_shortcode( 'company' );
 		}
 		// Return the HTML block
 		return $html;
 	}
 	/**
-	 * Individual book class
+	 * Individual company class
 	 *
 	 * @return string
 	 */
-	static function get_book_class( $book_index_number, $columns ) {
-		$book_types = wp_get_object_terms( get_the_ID(), self::CUSTOM_TAXONOMY_TYPE, array( 'fields' => 'slugs' ) );
+	static function get_company_class( $company_index_number, $columns ) {
+		$company_types = wp_get_object_terms( get_the_ID(), self::CUSTOM_TAXONOMY_TYPE, array( 'fields' => 'slugs' ) );
 		$class = array();
-		$class[] = 'book-entry-column-'.$columns;
-		// add a type- class for each book type
-		foreach ( $book_types as $book_type ) {
-			$class[] = 'type-' . esc_html( $book_type );
+		$class[] = 'company-entry-column-'.$columns;
+		// add a type- class for each company type
+		foreach ( $company_types as $company_type ) {
+			$class[] = 'type-' . esc_html( $company_type );
 		}
 		if( $columns > 1) {
-			if ( ( $book_index_number % 2 ) == 0 ) {
-				$class[] = 'book-entry-mobile-first-item-row';
+			if ( ( $company_index_number % 2 ) == 0 ) {
+				$class[] = 'company-entry-mobile-first-item-row';
 			} else {
-				$class[] = 'book-entry-mobile-last-item-row';
+				$class[] = 'company-entry-mobile-last-item-row';
 			}
 		}
 		// add first and last classes to first and last items in a row
-		if ( ( $book_index_number % $columns ) == 0 ) {
-			$class[] = 'book-entry-first-item-row';
-		} elseif ( ( $book_index_number % $columns ) == ( $columns - 1 ) ) {
-			$class[] = 'book-entry-last-item-row';
+		if ( ( $company_index_number % $columns ) == 0 ) {
+			$class[] = 'company-entry-first-item-row';
+		} elseif ( ( $company_index_number % $columns ) == ( $columns - 1 ) ) {
+			$class[] = 'company-entry-last-item-row';
 		}
 		/**
-		 * Filter the class applied to book div in the book
+		 * Filter the class applied to company div in the company
 		 *
 		 * @module custom-content-types
 		 *
 		 * @since 3.1.0
 		 *
 		 * @param string $class class name of the div.
-		 * @param int $book_index_number iterator count the number of columns up starting from 0.
+		 * @param int $company_index_number iterator count the number of columns up starting from 0.
 		 * @param int $columns number of columns to display the content in.
 		 *
 		 */
-		return apply_filters( 'book-post-class', implode( " ", $class ) , $book_index_number, $columns );
+		return apply_filters( 'company-post-class', implode( " ", $class ) , $company_index_number, $columns );
 	}
 	/**
-	 * Displays the book type that a book belongs to.
+	 * Displays the company type that a company belongs to.
 	 *
 	 * @return html
 	 */
-	static function get_book_type( $post_id ) {
-		$book_types = get_the_terms( $post_id, self::CUSTOM_TAXONOMY_TYPE );
+	static function get_company_type( $post_id ) {
+		$company_types = get_the_terms( $post_id, self::CUSTOM_TAXONOMY_TYPE );
 		// If no types, return empty string
-		if ( empty( $book_types ) || is_wp_error( $book_types ) ) {
+		if ( empty( $company_types ) || is_wp_error( $company_types ) ) {
 			return;
 		}
-		$html = '<div class="book-types"><span>' . __( 'Types', 'jetpack' ) . ':</span>';
+		$html = '<div class="company-types"><span>' . __( 'Types', 'jetpack' ) . ':</span>';
 		$types = array();
 		// Loop thorugh all the types
-		foreach ( $book_types as $book_type ) {
-			$book_type_link = get_term_link( $book_type, self::CUSTOM_TAXONOMY_TYPE );
-			if ( is_wp_error( $book_type_link ) ) {
-				return $book_type_link;
+		foreach ( $company_types as $company_type ) {
+			$company_type_link = get_term_link( $company_type, self::CUSTOM_TAXONOMY_TYPE );
+			if ( is_wp_error( $company_type_link ) ) {
+				return $company_type_link;
 			}
-			$types[] = '<a href="' . esc_url( $book_type_link ) . '" rel="tag">' . esc_html( $book_type->name ) . '</a>';
+			$types[] = '<a href="' . esc_url( $company_type_link ) . '" rel="tag">' . esc_html( $company_type->name ) . '</a>';
 		}
 		$html .= ' '.implode( ', ', $types );
 		$html .= '</div>';
 		return $html;
 	}
 	/**
-	 * Displays the book tags that a book belongs to.
+	 * Displays the company tags that a company belongs to.
 	 *
 	 * @return html
 	 */
-	static function get_book_tags( $post_id ) {
-		$book_tags = get_the_terms( $post_id, self::CUSTOM_TAXONOMY_TAG );
+	static function get_company_tags( $post_id ) {
+		$company_tags = get_the_terms( $post_id, self::CUSTOM_TAXONOMY_TAG );
 		// If no tags, return empty string
-		if ( empty( $book_tags ) || is_wp_error( $book_tags ) ) {
+		if ( empty( $company_tags ) || is_wp_error( $company_tags ) ) {
 			return false;
 		}
-		$html = '<div class="book-tags"><span>' . __( 'Tags', 'jetpack' ) . ':</span>';
+		$html = '<div class="company-tags"><span>' . __( 'Tags', 'jetpack' ) . ':</span>';
 		$tags = array();
 		// Loop thorugh all the tags
-		foreach ( $book_tags as $book_tag ) {
-			$book_tag_link = get_term_link( $book_tag, self::CUSTOM_TAXONOMY_TYPE );
-			if ( is_wp_error( $book_tag_link ) ) {
-				return $book_tag_link;
+		foreach ( $company_tags as $company_tag ) {
+			$company_tag_link = get_term_link( $company_tag, self::CUSTOM_TAXONOMY_TYPE );
+			if ( is_wp_error( $company_tag_link ) ) {
+				return $company_tag_link;
 			}
-			$tags[] = '<a href="' . esc_url( $book_tag_link ) . '" rel="tag">' . esc_html( $book_tag->name ) . '</a>';
+			$tags[] = '<a href="' . esc_url( $company_tag_link ) . '" rel="tag">' . esc_html( $company_tag->name ) . '</a>';
 		}
 		$html .= ' '. implode( ', ', $tags );
 		$html .= '</div>';
 		return $html;
 	}
 	/**
-	 * Displays the author of the current book.
+	 * Displays the author of the current company.
 	 *
 	 * @return html
 	 */
-	static function get_book_author() {
-		$html = '<div class="book-author">';
+	static function get_company_author() {
+		$html = '<div class="company-author">';
 		/* translators: %1$s is link to author posts, %2$s is author display name */
 		$html .= sprintf( __( '<span>Author:</span> <a href="%1$s">%2$s</a>', 'jetpack' ),
 			esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ),
@@ -808,10 +808,10 @@ class Jetpack_Book {
 	 *
 	 * @return html
 	 */
-	static function get_book_thumbnail_link( $post_id ) {
+	static function get_company_thumbnail_link( $post_id ) {
 		if ( has_post_thumbnail( $post_id ) ) {
 			/**
-			 * Change the Book thumbnail size.
+			 * Change the Company thumbnail size.
 			 *
 			 * @module custom-content-types
 			 *
@@ -819,11 +819,11 @@ class Jetpack_Book {
 			 *
 			 * @param string|array $var Either a registered size keyword or size array.
 			 */
-			return '<a class="book-featured-image" href="' . esc_url( get_permalink( $post_id ) ) . '">' . get_the_post_thumbnail( $post_id, apply_filters( 'jetpack_book_thumbnail_size', 'large' ) ) . '</a>';
+			return '<a class="company-featured-image" href="' . esc_url( get_permalink( $post_id ) ) . '">' . get_the_post_thumbnail( $post_id, apply_filters( 'jetpack_company_thumbnail_size', 'large' ) ) . '</a>';
 		}
 	}
 }
-add_action( 'init', array( 'Jetpack_Book', 'init' ) );
+add_action( 'init', array( 'Jetpack_Company', 'init' ) );
 // Check on plugin activation if theme supports CPT
-register_activation_hook( __FILE__,                         array( 'Jetpack_Book', 'activation_post_type_support' ) );
-add_action( 'jetpack_activate_module_custom-content-types', array( 'Jetpack_Book', 'activation_post_type_support' ) );
+register_activation_hook( __FILE__,                         array( 'Jetpack_Company', 'activation_post_type_support' ) );
+add_action( 'jetpack_activate_module_custom-content-types', array( 'Jetpack_Company', 'activation_post_type_support' ) );
