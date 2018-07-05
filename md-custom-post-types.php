@@ -15,9 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Class Millionairesdigest_Jetpack_Cpt
+ * Class Millionairesdigest_Cpt
  */
-Class Millionairesdigest_Jetpack_Cpt {
+Class Millionairesdigest_Cpt {
     
     private static $instance;
     private $path;
@@ -64,12 +64,12 @@ Class Millionairesdigest_Jetpack_Cpt {
      */
     public function load_text_domain() {
 
-        load_plugin_textdomain( 'md-jetpack-custom-post-types', FALSE, plugin_basename( dirname( __FILE__ ) ) . '/languages' );
+        load_plugin_textdomain( 'md-custom-post-types', FALSE, plugin_basename( dirname( __FILE__ ) ) . '/languages' );
 
     }
 
 }
-Millionairesdigest_Jetpack_Cpt::get_instance();
+Millionairesdigest_Cpt::get_instance();
 
 
 
