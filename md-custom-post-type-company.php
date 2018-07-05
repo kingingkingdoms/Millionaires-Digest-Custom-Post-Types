@@ -5,16 +5,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/**
- * Add custom post type support "Company" to Jetpack
- *
- * Class Jetpack_Company
- */
 class Jetpack_Company {
 	
 	
-	const CUSTOM_POST_TYPE       = 'jetpack-company';
-	const CUSTOM_TAXONOMY_TYPE   = 'jetpack-company-type';
+	const CUSTOM_POST_TYPE       = 'company';
+	const CUSTOM_TAXONOMY_TYPE   = 'jetpack-company-category';
 	const CUSTOM_TAXONOMY_TAG    = 'jetpack-company-tag';
 	const OPTION_NAME            = 'jetpack_company';
 	const OPTION_READING_SETTING = 'jetpack_company_posts_per_page';
@@ -40,7 +35,7 @@ class Jetpack_Company {
 		// Make sure the post types are loaded for imports
 		add_action( 'import_start',                                                    array( $this, 'register_post_types' ) );
 		// Add to REST API post type whitelist
-		add_filter( 'rest_api_allowed_post_types',                                     array( $this, 'allow_company_rest_api_type' ) );
+		add_filter( 'rest_api_allowed_post_types',                                     array( $this, 'allow_company_article_rest_api_type' ) );
 		$setting = Jetpack_Options::get_option_and_ensure_autoload( self::OPTION_NAME, '0' );
 		// Bail early if Company option is not set and the theme doesn't declare support
 		if ( empty( $setting ) && ! $this->site_supports_custom_post_type() ) {
@@ -50,7 +45,7 @@ class Jetpack_Company {
 		$this->register_post_types();
 		add_action( sprintf( 'add_option_%s', self::OPTION_NAME ),                     array( $this, 'flush_rules_on_enable' ), 10 );
 		add_action( sprintf( 'update_option_%s', self::OPTION_NAME ),                  array( $this, 'flush_rules_on_enable' ), 10 );
-		add_action( sprintf( 'publish_%s', self::CUSTOM_POST_TYPE),                    array( $this, 'flush_rules_on_first_company' ) );
+		add_action( sprintf( 'publish_%s', self::CUSTOM_POST_TYPE),                    array( $this, 'flush_rules_on_first_project' ) );
 		add_action( 'after_switch_theme',                                              array( $this, 'flush_rules_on_switch' ) );
 		// Admin Customization
 		add_filter( 'post_updated_messages',                                           array( $this, 'updated_messages'   ) );
@@ -61,13 +56,13 @@ class Jetpack_Company {
 			// Track all the things
 			add_action( sprintf( 'add_option_%s', self::OPTION_NAME ),                 array( $this, 'new_activation_stat_bump' ) );
 			add_action( sprintf( 'update_option_%s', self::OPTION_NAME ),              array( $this, 'update_option_stat_bump' ), 11, 2 );
-			add_action( sprintf( 'publish_%s', self::CUSTOM_POST_TYPE),                array( $this, 'new_company_stat_bump' ) );
+			add_action( sprintf( 'publish_%s', self::CUSTOM_POST_TYPE),                array( $this, 'new_project_stat_bump' ) );
 		}
 		add_image_size( 'jetpack-company-admin-thumb', 50, 50, true );
 		add_action( 'admin_enqueue_scripts',                                           array( $this, 'enqueue_admin_styles'  ) );
 		// register jetpack_company shortcode and company shortcode (legacy)
-		add_shortcode( 'company',                                                    array( $this, 'company_shortcode' ) );
-		add_shortcode( 'jetpack_company',                                            array( $this, 'company_shortcode' ) );
+		add_shortcode( 'company_article',                                                    array( $this, 'company_shortcode' ) );
+		add_shortcode( 'jetpack_company',                                            array( $this, 'company_article_shortcode' ) );
 		// Adjust CPT archive and custom taxonomies to obey CPT reading setting
 		add_filter( 'infinite_scroll_settings',                                        array( $this, 'infinite_scroll_click_posts_per_page' ) );
 		add_filter( 'infinite_scroll_results',                                         array( $this, 'infinite_scroll_results' ), 10, 3 );
@@ -133,7 +128,7 @@ class Jetpack_Company {
 			printf( '<p><label for="%1$s">%2$s</label></p>',
 				esc_attr( self::OPTION_READING_SETTING ),
 				/* translators: %1$s is replaced with an input field for numbers */
-				sprintf( __( 'Company pages display at most %1$s posts', 'jetpack' ),
+				sprintf( __( 'Company pages display at most %1$s articles', 'jetpack' ),
 					sprintf( '<input name="%1$s" id="%1$s" type="number" step="1" min="1" value="%2$s" class="small-text" />',
 						esc_attr( self::OPTION_READING_SETTING ),
 						esc_attr( get_option( self::OPTION_READING_SETTING, '10' ) )
@@ -146,24 +141,24 @@ class Jetpack_Company {
 	 * Bump Company > New Activation stat
 	 */
 	function new_activation_stat_bump() {
-		bump_stats_extras( 'company', 'new-activation' );
+		bump_stats_extras( 'company_articles', 'new-activation' );
 	}
 	/*
 	 * Bump Company > Option On/Off stats to get total active
 	 */
 	function update_option_stat_bump( $old, $new ) {
 		if ( empty( $old ) && ! empty( $new ) ) {
-			bump_stats_extras( 'company', 'option-on' );
+			bump_stats_extras( 'company_articles', 'option-on' );
 		}
 		if ( ! empty( $old ) && empty( $new ) ) {
-			bump_stats_extras( 'company', 'option-off' );
+			bump_stats_extras( 'company_articles', 'option-off' );
 		}
 	}
 	/*
-	 * Bump Company > Published Company stat when Company are published
+	 * Bump Company > Published Projects stat when projects are published
 	 */
-	function new_company_stat_bump() {
-		bump_stats_extras( 'company', 'published-company' );
+	function new_project_stat_bump() {
+		bump_stats_extras( 'company_articles', 'published-projects' );
 	}
 	/**
 	* Should this Custom Post Type be made available?
@@ -184,15 +179,15 @@ class Jetpack_Company {
 		flush_rewrite_rules();
 	}
 	/*
-	 * Count published company and flush permalinks when first company is published
+	 * Count published projects and flush permalinks when first projects is published
 	 */
-	function flush_rules_on_first_company() {
-		$company = get_transient( 'jetpack-company-count-cache' );
-		if ( false === $company ) {
+	function flush_rules_on_first_project() {
+		$projects = get_transient( 'jetpack-company-count-cache' );
+		if ( false === $projects ) {
 			flush_rewrite_rules();
-			$company = (int) wp_count_posts( self::CUSTOM_POST_TYPE )->publish;
-			if ( ! empty( $company ) ) {
-				set_transient( 'jetpack-company-count-cache', $company, HOUR_IN_SECONDS * 12 );
+			$projects = (int) wp_count_posts( self::CUSTOM_POST_TYPE )->publish;
+			if ( ! empty( $projects ) ) {
+				set_transient( 'jetpack-company-count-cache', $projects, HOUR_IN_SECONDS * 12 );
 			}
 		}
 	}
@@ -236,8 +231,8 @@ class Jetpack_Company {
 		register_post_type( self::CUSTOM_POST_TYPE, array(
 			'description' => __( 'Company Items', 'jetpack' ),
 			'labels' => array(
-				'name'                  => esc_html__( 'Articles',                   'jetpack' ),
-				'singular_name'         => esc_html__( 'Article',                    'jetpack' ),
+				'name'                  => esc_html__( 'Company Articles',                   'jetpack' ),
+				'singular_name'         => esc_html__( 'Company Article',                    'jetpack' ),
 				'menu_name'             => esc_html__( 'Company',                  'jetpack' ),
 				'all_items'             => esc_html__( 'All Articles',               'jetpack' ),
 				'add_new'               => esc_html__( 'Add New',                    'jetpack' ),
@@ -269,21 +264,22 @@ class Jetpack_Company {
 				'feeds'      => true,
 				'pages'      => true,
 			),
-			'public'          => true,
+			'public'          => false,
+			'show_in_nav_menus' => true,
 			'show_ui'         => true,
-			'menu_position'   => 20,                    // below Pages
+			'menu_position'   => '',                    // below Pages
 			'menu_icon'       => 'dashicons-admin-post', // 3.8+ dashicon option
 			'capability_type' => 'page',
- 'capabilities' => array( // allow only to admin
- 'publish_posts' => 'edit_posts',
- 'edit_posts' => 'edit_posts',
- 'edit_others_posts' => 'edit_posts',
- 'delete_posts' => 'edit_posts',
- 'delete_others_posts' => 'edit_posts',
- 'read_private_posts' => 'edit_posts',
- 'edit_post' => 'edit_posts',
- 'delete_post' => 'edit_posts',
- 'read_post' => 'edit_posts',
+ 'capabilities' => array( // allow only to editors and up
+ 'publish_posts' => 'edit_others_posts',
+ 'edit_posts' => 'edit_others_posts',
+ 'edit_others_posts' => 'edit_others_posts',
+ 'delete_posts' => 'edit_others_posts',
+ 'delete_others_posts' => 'edit_others_posts',
+ 'read_private_posts' => 'edit_others_posts',
+ 'edit_post' => 'edit_others_posts',
+ 'delete_post' => 'edit_others_posts',
+ 'read_post' => 'edit_others_posts',
  ),
 			
 			'taxonomies'      => array( self::CUSTOM_TAXONOMY_TYPE, self::CUSTOM_TAXONOMY_TAG ),
@@ -294,57 +290,59 @@ class Jetpack_Company {
 		register_taxonomy( self::CUSTOM_TAXONOMY_TYPE, self::CUSTOM_POST_TYPE, array(
 			'hierarchical'      => true,
 			'labels'            => array(
-				'name'                  => esc_html__( 'Company Categories',                 'jetpack' ),
-				'singular_name'         => esc_html__( 'Company Category',                  'jetpack' ),
+				'name'                  => esc_html__( 'Categories',                 'jetpack' ),
+				'singular_name'         => esc_html__( 'Category',                  'jetpack' ),
 				'menu_name'             => esc_html__( 'Company Categories',                 'jetpack' ),
-				'all_items'             => esc_html__( 'All Company Categories',             'jetpack' ),
-				'edit_item'             => esc_html__( 'Edit Company Category',             'jetpack' ),
-				'view_item'             => esc_html__( 'View Company Category',             'jetpack' ),
-				'update_item'           => esc_html__( 'Update Company Category',           'jetpack' ),
-				'add_new_item'          => esc_html__( 'Add New Company Category',          'jetpack' ),
-				'new_item_name'         => esc_html__( 'New Company Category Name',         'jetpack' ),
-				'parent_item'           => esc_html__( 'Parent Company Category',           'jetpack' ),
-				'parent_item_colon'     => esc_html__( 'Parent Company Category:',          'jetpack' ),
-				'search_items'          => esc_html__( 'Search Company Categories',          'jetpack' ),
-				'items_list_navigation' => esc_html__( 'Company category list navigation',  'jetpack' ),
-				'items_list'            => esc_html__( 'Company category list',             'jetpack' ),
+				'all_items'             => esc_html__( 'All Categories',             'jetpack' ),
+				'edit_item'             => esc_html__( 'Edit Category',             'jetpack' ),
+				'view_item'             => esc_html__( 'View Category',             'jetpack' ),
+				'update_item'           => esc_html__( 'Update Category',           'jetpack' ),
+				'add_new_item'          => esc_html__( 'Add New Category',          'jetpack' ),
+				'new_item_name'         => esc_html__( 'New Category Name',         'jetpack' ),
+				'parent_item'           => esc_html__( 'Parent Category',           'jetpack' ),
+				'parent_item_colon'     => esc_html__( 'Parent Category:',          'jetpack' ),
+				'search_items'          => esc_html__( 'Search Categories',          'jetpack' ),
+				'items_list_navigation' => esc_html__( 'Category list navigation',  'jetpack' ),
+				'items_list'            => esc_html__( 'Category list',             'jetpack' ),
 			),
-			'public'            => true,
+			'public'          => false,
+			'show_in_nav_menus' => true,
 			'show_ui'           => true,
 			'show_in_nav_menus' => true,
 			'show_in_rest'      => true,
 			'show_admin_column' => true,
 			'query_var'         => true,
-			'rewrite'           => array( 'slug' => 'company-category' ),
+			'rewrite'           => array( 'slug' => 'project-type' ),
 		) );
 		register_taxonomy( self::CUSTOM_TAXONOMY_TAG, self::CUSTOM_POST_TYPE, array(
 			'hierarchical'      => false,
 			'labels'            => array(
-				'name'                       => esc_html__( 'Company Tags',                   'jetpack' ),
-				'singular_name'              => esc_html__( 'Company Tag',                    'jetpack' ),
+				'name'                       => esc_html__( 'Tags',                   'jetpack' ),
+				'singular_name'              => esc_html__( 'Tag',                    'jetpack' ),
 				'menu_name'                  => esc_html__( 'Company Tags',                   'jetpack' ),
-				'all_items'                  => esc_html__( 'All Company Tags',               'jetpack' ),
-				'edit_item'                  => esc_html__( 'Edit Company Tag',               'jetpack' ),
-				'view_item'                  => esc_html__( 'View Company Tag',               'jetpack' ),
-				'update_item'                => esc_html__( 'Update Company Tag',             'jetpack' ),
-				'add_new_item'               => esc_html__( 'Add New Company Tag',            'jetpack' ),
-				'new_item_name'              => esc_html__( 'New Company Tag Name',           'jetpack' ),
-				'search_items'               => esc_html__( 'Search Company Tags',            'jetpack' ),
-				'popular_items'              => esc_html__( 'Popular Company Tags',           'jetpack' ),
+				'all_items'                  => esc_html__( 'All Tags',               'jetpack' ),
+				'edit_item'                  => esc_html__( 'Edit Tag',               'jetpack' ),
+				'view_item'                  => esc_html__( 'View Tag',               'jetpack' ),
+				'update_item'                => esc_html__( 'Update Tag',             'jetpack' ),
+				'add_new_item'               => esc_html__( 'Add New Tag',            'jetpack' ),
+				'new_item_name'              => esc_html__( 'New Tag Name',           'jetpack' ),
+				'search_items'               => esc_html__( 'Search Tags',            'jetpack' ),
+				'popular_items'              => esc_html__( 'Popular Tags',           'jetpack' ),
 				'separate_items_with_commas' => esc_html__( 'Separate tags with commas',      'jetpack' ),
 				'add_or_remove_items'        => esc_html__( 'Add or remove tags',             'jetpack' ),
 				'choose_from_most_used'      => esc_html__( 'Choose from the most used tags', 'jetpack' ),
 				'not_found'                  => esc_html__( 'No tags found.',                 'jetpack' ),
-				'items_list_navigation'      => esc_html__( 'Company tag list navigation',    'jetpack' ),
-				'items_list'                 => esc_html__( 'Company tag list',               'jetpack' ),
+				'items_list_navigation'      => esc_html__( 'Tag list navigation',    'jetpack' ),
+				'items_list'                 => esc_html__( 'Tag list',               'jetpack' ),
 			),
-			'public'            => true,
+			'public'          => false,
+			'show_in_nav_menus' => true,
 			'show_ui'           => true,
 			'show_in_nav_menus' => true,
 			'show_in_rest'      => true,
 			'show_admin_column' => true,
 			'query_var'         => true,
-			'rewrite'           => array( 'slug' => 'company-tag' ),
+			'rewrite'           => array( 'slug' => 'project-tag' ),
 		) );
 	}
 	/**
@@ -375,10 +373,10 @@ class Jetpack_Company {
 	 * Add Featured Image column
 	 */
 	function edit_admin_columns( $columns ) {
-		// change 'Title' to 'Company'
-		$columns['title'] = __( 'Company Article', 'jetpack' );
+		// change 'Title' to 'Articles'
+		$columns['title'] = __( 'Articles', 'jetpack' );
 		if ( current_theme_supports( 'post-thumbnails' ) ) {
-			// add featured image before 'Company'
+			// add featured image before 'Articles'
 			$columns = array_slice( $columns, 0, 1, true ) + array( 'thumbnail' => '' ) + array_slice( $columns, 1, NULL, true );
 		}
 		return $columns;
@@ -412,20 +410,20 @@ class Jetpack_Company {
 			return;
 		}
 		$wp_customize->add_section( 'jetpack_company', array(
-			'title'                    => esc_html__( 'Company Article', 'jetpack' ),
+			'title'                    => esc_html__( 'Company', 'jetpack' ),
 			'theme_supports'           => self::CUSTOM_POST_TYPE,
 			'priority'                 => 130,
 		) );
 		if ( isset( $options[0]['title'] ) && true === $options[0]['title'] ) {
 			$wp_customize->add_setting( 'jetpack_company_title', array(
-				'default'              => esc_html__( 'Company Articles', 'jetpack' ),
+				'default'              => esc_html__( 'Articles', 'jetpack' ),
 				'type'                 => 'option',
 				'sanitize_callback'    => 'sanitize_text_field',
 				'sanitize_js_callback' => 'sanitize_text_field',
 			) );
 			$wp_customize->add_control( 'jetpack_company_title', array(
 				'section'              => 'jetpack_company',
-				'label'                => esc_html__( 'Company Article Archive Title', 'jetpack' ),
+				'label'                => esc_html__( 'Company Archive Title', 'jetpack' ),
 				'type'                 => 'text',
 			) );
 		}
@@ -438,7 +436,7 @@ class Jetpack_Company {
 			) );
 			$wp_customize->add_control( 'jetpack_company_content', array(
 				'section'              => 'jetpack_company',
-				'label'                => esc_html__( 'Company Article Archive Content', 'jetpack' ),
+				'label'                => esc_html__( 'Company Archive Content', 'jetpack' ),
 				'type'                 => 'textarea',
 			) );
 		}
@@ -452,7 +450,7 @@ class Jetpack_Company {
 			) );
 			$wp_customize->add_control( new WP_Customize_Image_Control( $wp_customize, 'jetpack_company_featured_image', array(
 				'section'              => 'jetpack_company',
-				'label'                => esc_html__( 'Company Article Archive Featured Image', 'jetpack' ),
+				'label'                => esc_html__( 'Company Archive Featured Image', 'jetpack' ),
 			) ) );
 		}
 	}
@@ -638,7 +636,7 @@ class Jetpack_Company {
 				$query->the_post();
 				$post_id = get_the_ID();
 				?>
-				<div class="company-entry <?php echo esc_attr( self::get_company_class( $company_index_number, $atts['columns'] ) ); ?>">
+				<div class="company-entry <?php echo esc_attr( self::get_project_class( $company_article_index_number, $atts['columns'] ) ); ?>">
 					<header class="company-entry-header">
 					<?php
 					// Featured image
@@ -650,13 +648,13 @@ class Jetpack_Company {
 						<div class="company-entry-meta">
 						<?php
 						if ( false != $atts['display_types'] ) {
-							echo self::get_company_type( $post_id );
+							echo self::get_project_type( $post_id );
 						}
 						if ( false != $atts['display_tags'] ) {
-							echo self::get_company_tags( $post_id );
+							echo self::get_project_tags( $post_id );
 						}
 						if ( false != $atts['display_author'] ) {
-							echo self::get_company_author( $post_id );
+							echo self::get_project_author( $post_id );
 						}
 						?>
 						</div>
@@ -699,17 +697,17 @@ class Jetpack_Company {
 		return $html;
 	}
 	/**
-	 * Individual company class
+	 * Individual project class
 	 *
 	 * @return string
 	 */
-	static function get_company_class( $company_index_number, $columns ) {
-		$company_types = wp_get_object_terms( get_the_ID(), self::CUSTOM_TAXONOMY_TYPE, array( 'fields' => 'slugs' ) );
+	static function get_project_class( $company_index_number, $columns ) {
+		$project_types = wp_get_object_terms( get_the_ID(), self::CUSTOM_TAXONOMY_TYPE, array( 'fields' => 'slugs' ) );
 		$class = array();
 		$class[] = 'company-entry-column-'.$columns;
-		// add a type- class for each company type
-		foreach ( $company_types as $company_type ) {
-			$class[] = 'type-' . esc_html( $company_type );
+		// add a type- class for each project type
+		foreach ( $project_types as $project_type ) {
+			$class[] = 'type-' . esc_html( $project_type );
 		}
 		if( $columns > 1) {
 			if ( ( $company_index_number % 2 ) == 0 ) {
@@ -725,7 +723,7 @@ class Jetpack_Company {
 			$class[] = 'company-entry-last-item-row';
 		}
 		/**
-		 * Filter the class applied to company div in the company
+		 * Filter the class applied to project div in the company
 		 *
 		 * @module custom-content-types
 		 *
@@ -736,65 +734,65 @@ class Jetpack_Company {
 		 * @param int $columns number of columns to display the content in.
 		 *
 		 */
-		return apply_filters( 'company-post-class', implode( " ", $class ) , $company_index_number, $columns );
+		return apply_filters( 'company-project-post-class', implode( " ", $class ) , $company_index_number, $columns );
 	}
 	/**
-	 * Displays the company type that a company belongs to.
+	 * Displays the project type that a project belongs to.
 	 *
 	 * @return html
 	 */
-	static function get_company_type( $post_id ) {
-		$company_types = get_the_terms( $post_id, self::CUSTOM_TAXONOMY_TYPE );
+	static function get_project_type( $post_id ) {
+		$project_types = get_the_terms( $post_id, self::CUSTOM_TAXONOMY_TYPE );
 		// If no types, return empty string
-		if ( empty( $company_types ) || is_wp_error( $company_types ) ) {
+		if ( empty( $project_types ) || is_wp_error( $project_types ) ) {
 			return;
 		}
-		$html = '<div class="company-types"><span>' . __( 'Types', 'jetpack' ) . ':</span>';
+		$html = '<div class="project-types"><span>' . __( 'Types', 'jetpack' ) . ':</span>';
 		$types = array();
 		// Loop thorugh all the types
-		foreach ( $company_types as $company_type ) {
-			$company_type_link = get_term_link( $company_type, self::CUSTOM_TAXONOMY_TYPE );
-			if ( is_wp_error( $company_type_link ) ) {
-				return $company_type_link;
+		foreach ( $project_types as $project_type ) {
+			$project_type_link = get_term_link( $project_type, self::CUSTOM_TAXONOMY_TYPE );
+			if ( is_wp_error( $project_type_link ) ) {
+				return $project_type_link;
 			}
-			$types[] = '<a href="' . esc_url( $company_type_link ) . '" rel="tag">' . esc_html( $company_type->name ) . '</a>';
+			$types[] = '<a href="' . esc_url( $project_type_link ) . '" rel="tag">' . esc_html( $project_type->name ) . '</a>';
 		}
 		$html .= ' '.implode( ', ', $types );
 		$html .= '</div>';
 		return $html;
 	}
 	/**
-	 * Displays the company tags that a company belongs to.
+	 * Displays the project tags that a project belongs to.
 	 *
 	 * @return html
 	 */
-	static function get_company_tags( $post_id ) {
-		$company_tags = get_the_terms( $post_id, self::CUSTOM_TAXONOMY_TAG );
+	static function get_project_tags( $post_id ) {
+		$project_tags = get_the_terms( $post_id, self::CUSTOM_TAXONOMY_TAG );
 		// If no tags, return empty string
-		if ( empty( $company_tags ) || is_wp_error( $company_tags ) ) {
+		if ( empty( $project_tags ) || is_wp_error( $project_tags ) ) {
 			return false;
 		}
-		$html = '<div class="company-tags"><span>' . __( 'Tags', 'jetpack' ) . ':</span>';
+		$html = '<div class="project-tags"><span>' . __( 'Tags', 'jetpack' ) . ':</span>';
 		$tags = array();
 		// Loop thorugh all the tags
-		foreach ( $company_tags as $company_tag ) {
-			$company_tag_link = get_term_link( $company_tag, self::CUSTOM_TAXONOMY_TYPE );
-			if ( is_wp_error( $company_tag_link ) ) {
-				return $company_tag_link;
+		foreach ( $project_tags as $project_tag ) {
+			$project_tag_link = get_term_link( $project_tag, self::CUSTOM_TAXONOMY_TYPE );
+			if ( is_wp_error( $project_tag_link ) ) {
+				return $project_tag_link;
 			}
-			$tags[] = '<a href="' . esc_url( $company_tag_link ) . '" rel="tag">' . esc_html( $company_tag->name ) . '</a>';
+			$tags[] = '<a href="' . esc_url( $project_tag_link ) . '" rel="tag">' . esc_html( $project_tag->name ) . '</a>';
 		}
 		$html .= ' '. implode( ', ', $tags );
 		$html .= '</div>';
 		return $html;
 	}
 	/**
-	 * Displays the author of the current company.
+	 * Displays the author of the current company project.
 	 *
 	 * @return html
 	 */
-	static function get_company_author() {
-		$html = '<div class="company-author">';
+	static function get_project_author() {
+		$html = '<div class="project-author">';
 		/* translators: %1$s is link to author posts, %2$s is author display name */
 		$html .= sprintf( __( '<span>Author:</span> <a href="%1$s">%2$s</a>', 'jetpack' ),
 			esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ),
