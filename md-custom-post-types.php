@@ -59,15 +59,6 @@ Class Millionairesdigest_Cpt {
 
     }
 
-	/**
-     * load language text domain
-     */
-    public function load_text_domain() {
-
-        load_plugin_textdomain( 'md-custom-post-types', FALSE, plugin_basename( dirname( __FILE__ ) ) . '/languages' );
-
-    }
-
 }
 Millionairesdigest_Cpt::get_instance();
 
