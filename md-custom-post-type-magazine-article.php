@@ -5,17 +5,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/**
- * Add custom post type support "Magazine Article" to Jetpack
- *
- * Class Jetpack_Magazine_Article
- */
 class Jetpack_Magazine_Article {
 	
 	
-	const CUSTOM_POST_TYPE       = 'jetpack-magazine-article';
-	const CUSTOM_TAXONOMY_TYPE   = 'jetpack-magazine-article-type';
-	const CUSTOM_TAXONOMY_TAG    = 'jetpack-magazine-article-tag';
+	const CUSTOM_POST_TYPE       = 'magazine-article';
+	const CUSTOM_TAXONOMY_TYPE   = 'jetpack-magazine-category';
+	const CUSTOM_TAXONOMY_TAG    = 'jetpack-magazine-tag';
 	const OPTION_NAME            = 'jetpack_magazine_article';
 	const OPTION_READING_SETTING = 'jetpack_magazine_article_posts_per_page';
 	public $version = '0.1';
@@ -50,7 +45,7 @@ class Jetpack_Magazine_Article {
 		$this->register_post_types();
 		add_action( sprintf( 'add_option_%s', self::OPTION_NAME ),                     array( $this, 'flush_rules_on_enable' ), 10 );
 		add_action( sprintf( 'update_option_%s', self::OPTION_NAME ),                  array( $this, 'flush_rules_on_enable' ), 10 );
-		add_action( sprintf( 'publish_%s', self::CUSTOM_POST_TYPE),                    array( $this, 'flush_rules_on_first_magazine_article' ) );
+		add_action( sprintf( 'publish_%s', self::CUSTOM_POST_TYPE),                    array( $this, 'flush_rules_on_first_project' ) );
 		add_action( 'after_switch_theme',                                              array( $this, 'flush_rules_on_switch' ) );
 		// Admin Customization
 		add_filter( 'post_updated_messages',                                           array( $this, 'updated_messages'   ) );
@@ -61,7 +56,7 @@ class Jetpack_Magazine_Article {
 			// Track all the things
 			add_action( sprintf( 'add_option_%s', self::OPTION_NAME ),                 array( $this, 'new_activation_stat_bump' ) );
 			add_action( sprintf( 'update_option_%s', self::OPTION_NAME ),              array( $this, 'update_option_stat_bump' ), 11, 2 );
-			add_action( sprintf( 'publish_%s', self::CUSTOM_POST_TYPE),                array( $this, 'new_magazine_article_stat_bump' ) );
+			add_action( sprintf( 'publish_%s', self::CUSTOM_POST_TYPE),                array( $this, 'new_project_stat_bump' ) );
 		}
 		add_image_size( 'jetpack-magazine-article-admin-thumb', 50, 50, true );
 		add_action( 'admin_enqueue_scripts',                                           array( $this, 'enqueue_admin_styles'  ) );
@@ -94,7 +89,7 @@ class Jetpack_Magazine_Article {
 	function settings_api_init() {
 		add_settings_field(
 			self::OPTION_NAME,
-			'<span class="cpt-options">' . __( 'Magazine Articles', 'jetpack' ) . '</span>',
+			'<span class="cpt-options">' . __( 'Magazine Article', 'jetpack' ) . '</span>',
 			array( $this, 'setting_html' ),
 			'writing',
 			'jetpack_cpt_section'
@@ -125,7 +120,7 @@ class Jetpack_Magazine_Article {
 		<?php else : ?>
 			<label for="<?php echo esc_attr( self::OPTION_NAME ); ?>">
 				<input name="<?php echo esc_attr( self::OPTION_NAME ); ?>" id="<?php echo esc_attr( self::OPTION_NAME ); ?>" <?php echo checked( get_option( self::OPTION_NAME, '0' ), true, false ); ?> type="checkbox" value="1" />
-				<?php esc_html_e( 'Enable Magazine Articles for this site.', 'jetpack' ); ?>
+				<?php esc_html_e( 'Enable Magazine Article for this site.', 'jetpack' ); ?>
 				<a target="_blank" href="http://en.support.wordpress.com/magazine-articles/"><?php esc_html_e( 'Learn More', 'jetpack' ); ?></a>
 			</label>
 		<?php endif;
@@ -133,7 +128,7 @@ class Jetpack_Magazine_Article {
 			printf( '<p><label for="%1$s">%2$s</label></p>',
 				esc_attr( self::OPTION_READING_SETTING ),
 				/* translators: %1$s is replaced with an input field for numbers */
-				sprintf( __( 'Magazine Article pages display at most %1$s magazine articles', 'jetpack' ),
+				sprintf( __( 'Magazine Article pages display at most %1$s articles', 'jetpack' ),
 					sprintf( '<input name="%1$s" id="%1$s" type="number" step="1" min="1" value="%2$s" class="small-text" />',
 						esc_attr( self::OPTION_READING_SETTING ),
 						esc_attr( get_option( self::OPTION_READING_SETTING, '10' ) )
@@ -160,10 +155,10 @@ class Jetpack_Magazine_Article {
 		}
 	}
 	/*
-	 * Bump Magazine Article > Published Magazine Articles stat when magazine articles are published
+	 * Bump Magazine Article > Published Projects stat when projects are published
 	 */
-	function new_magazine_article_stat_bump() {
-		bump_stats_extras( 'magazine_articles', 'published-magazine-articles' );
+	function new_project_stat_bump() {
+		bump_stats_extras( 'magazine_articles', 'published-projects' );
 	}
 	/**
 	* Should this Custom Post Type be made available?
@@ -184,15 +179,15 @@ class Jetpack_Magazine_Article {
 		flush_rewrite_rules();
 	}
 	/*
-	 * Count published magazine articles and flush permalinks when first magazine articles is published
+	 * Count published projects and flush permalinks when first projects is published
 	 */
-	function flush_rules_on_first_magazine_article() {
-		$magazine_articles = get_transient( 'jetpack-magazine-article-count-cache' );
-		if ( false === $magazine_articles ) {
+	function flush_rules_on_first_project() {
+		$projects = get_transient( 'jetpack-magazine-article-count-cache' );
+		if ( false === $projects ) {
 			flush_rewrite_rules();
-			$magazine_articles = (int) wp_count_posts( self::CUSTOM_POST_TYPE )->publish;
-			if ( ! empty( $magazine_articles ) ) {
-				set_transient( 'jetpack-magazine-article-count-cache', $magazine_articles, HOUR_IN_SECONDS * 12 );
+			$projects = (int) wp_count_posts( self::CUSTOM_POST_TYPE )->publish;
+			if ( ! empty( $projects ) ) {
+				set_transient( 'jetpack-magazine-article-count-cache', $projects, HOUR_IN_SECONDS * 12 );
 			}
 		}
 	}
@@ -216,13 +211,13 @@ class Jetpack_Magazine_Article {
 	 * On theme switch, check if CPT item exists and disable if not
 	 */
 	function deactivation_post_type_support() {
-		$magazine_articles = get_posts( array(
+		$magazine_article = get_posts( array(
 			'fields'           => 'ids',
 			'posts_per_page'   => 1,
 			'post_type'        => self::CUSTOM_POST_TYPE,
 			'suppress_filters' => false
 		) );
-		if ( empty( $magazine_articles ) ) {
+		if ( empty( $magazine_article ) ) {
 			update_option( self::OPTION_NAME, '0' );
 		}
 	}
@@ -238,19 +233,19 @@ class Jetpack_Magazine_Article {
 			'labels' => array(
 				'name'                  => esc_html__( 'Magazine Articles',                   'jetpack' ),
 				'singular_name'         => esc_html__( 'Magazine Article',                    'jetpack' ),
-				'menu_name'             => esc_html__( 'Magazine Articles',                   'jetpack' ),
-				'all_items'             => esc_html__( 'All Magazine Articles',               'jetpack' ),
-				'add_new'               => esc_html__( 'Add New',                             'jetpack' ),
-				'add_new_item'          => esc_html__( 'Add New Magazine Article',            'jetpack' ),
-				'edit_item'             => esc_html__( 'Edit Magazine Article',               'jetpack' ),
-				'new_item'              => esc_html__( 'New Magazine Article',                'jetpack' ),
-				'view_item'             => esc_html__( 'View Magazine Article',               'jetpack' ),
-				'search_items'          => esc_html__( 'Search Magazine Articles',            'jetpack' ),
-				'not_found'             => esc_html__( 'No Magazine Articles found',          'jetpack' ),
-				'not_found_in_trash'    => esc_html__( 'No Magazine Articles found in Trash', 'jetpack' ),
-				'filter_items_list'     => esc_html__( 'Filter magazine article list',        'jetpack' ),
-				'items_list_navigation' => esc_html__( 'Magazine Article list navigation',    'jetpack' ),
-				'items_list'            => esc_html__( 'Magazine Articles list',              'jetpack' ),
+				'menu_name'             => esc_html__( 'Magazine Articles',                  'jetpack' ),
+				'all_items'             => esc_html__( 'All Articles',               'jetpack' ),
+				'add_new'               => esc_html__( 'Add New',                    'jetpack' ),
+				'add_new_item'          => esc_html__( 'Add New Article',            'jetpack' ),
+				'edit_item'             => esc_html__( 'Edit Article',               'jetpack' ),
+				'new_item'              => esc_html__( 'New Article',                'jetpack' ),
+				'view_item'             => esc_html__( 'View Article',               'jetpack' ),
+				'search_items'          => esc_html__( 'Search Articles',            'jetpack' ),
+				'not_found'             => esc_html__( 'No Articles found',          'jetpack' ),
+				'not_found_in_trash'    => esc_html__( 'No Articles found in Trash', 'jetpack' ),
+				'filter_items_list'     => esc_html__( 'Filter articles list',       'jetpack' ),
+				'items_list_navigation' => esc_html__( 'Article list navigation',    'jetpack' ),
+				'items_list'            => esc_html__( 'Articles list',              'jetpack' ),
 			),
 			'supports' => array(
 				'title',
@@ -269,21 +264,22 @@ class Jetpack_Magazine_Article {
 				'feeds'      => true,
 				'pages'      => true,
 			),
-			'public'          => true,
+			'public'          => false,
+			'show_in_nav_menus' => true,
 			'show_ui'         => true,
-			'menu_position'   => 20,                    // below Pages
+			'menu_position'   => '',                    // below Pages
 			'menu_icon'       => 'dashicons-admin-post', // 3.8+ dashicon option
 			'capability_type' => 'page',
- 'capabilities' => array( // allow only to admin
- 'publish_posts' => 'edit_posts',
- 'edit_posts' => 'edit_posts',
- 'edit_others_posts' => 'edit_posts',
- 'delete_posts' => 'edit_posts',
- 'delete_others_posts' => 'edit_posts',
- 'read_private_posts' => 'edit_posts',
- 'edit_post' => 'edit_posts',
- 'delete_post' => 'edit_posts',
- 'read_post' => 'edit_posts',
+ 'capabilities' => array( // allow only to editors and up
+ 'publish_posts' => 'edit_others_posts',
+ 'edit_posts' => 'edit_others_posts',
+ 'edit_others_posts' => 'edit_others_posts',
+ 'delete_posts' => 'edit_others_posts',
+ 'delete_others_posts' => 'edit_others_posts',
+ 'read_private_posts' => 'edit_others_posts',
+ 'edit_post' => 'edit_others_posts',
+ 'delete_post' => 'edit_others_posts',
+ 'read_post' => 'edit_others_posts',
  ),
 			
 			'taxonomies'      => array( self::CUSTOM_TAXONOMY_TYPE, self::CUSTOM_TAXONOMY_TAG ),
@@ -294,57 +290,59 @@ class Jetpack_Magazine_Article {
 		register_taxonomy( self::CUSTOM_TAXONOMY_TYPE, self::CUSTOM_POST_TYPE, array(
 			'hierarchical'      => true,
 			'labels'            => array(
-				'name'                  => esc_html__( 'Magazine Article Categories',                 'jetpack' ),
-				'singular_name'         => esc_html__( 'Magazine Article Category',                   'jetpack' ),
-				'menu_name'             => esc_html__( 'Magazine Article Categories',                 'jetpack' ),
-				'all_items'             => esc_html__( 'All Magazine Article Categories',             'jetpack' ),
-				'edit_item'             => esc_html__( 'Edit Magazine Article Category',              'jetpack' ),
-				'view_item'             => esc_html__( 'View Magazine Article Category',              'jetpack' ),
-				'update_item'           => esc_html__( 'Update Magazine Article Category',            'jetpack' ),
-				'add_new_item'          => esc_html__( 'Add New Magazine Article Category',           'jetpack' ),
-				'new_item_name'         => esc_html__( 'New Magazine Article Category Name',          'jetpack' ),
-				'parent_item'           => esc_html__( 'Parent Magazine Article Category',            'jetpack' ),
-				'parent_item_colon'     => esc_html__( 'Parent Magazine Article Category:',           'jetpack' ),
-				'search_items'          => esc_html__( 'Search Magazine Article Categories',          'jetpack' ),
-				'items_list_navigation' => esc_html__( 'Magazine Article category list navigation',   'jetpack' ),
-				'items_list'            => esc_html__( 'Magazine Article category list',              'jetpack' ),
+				'name'                  => esc_html__( 'Categories',                 'jetpack' ),
+				'singular_name'         => esc_html__( 'Category',                  'jetpack' ),
+				'menu_name'             => esc_html__( 'Magazine Categories',                 'jetpack' ),
+				'all_items'             => esc_html__( 'All Categories',             'jetpack' ),
+				'edit_item'             => esc_html__( 'Edit Category',             'jetpack' ),
+				'view_item'             => esc_html__( 'View Category',             'jetpack' ),
+				'update_item'           => esc_html__( 'Update Category',           'jetpack' ),
+				'add_new_item'          => esc_html__( 'Add New Category',          'jetpack' ),
+				'new_item_name'         => esc_html__( 'New Category Name',         'jetpack' ),
+				'parent_item'           => esc_html__( 'Parent Category',           'jetpack' ),
+				'parent_item_colon'     => esc_html__( 'Parent Category:',          'jetpack' ),
+				'search_items'          => esc_html__( 'Search Categories',          'jetpack' ),
+				'items_list_navigation' => esc_html__( 'Category list navigation',  'jetpack' ),
+				'items_list'            => esc_html__( 'Category list',             'jetpack' ),
 			),
-			'public'            => true,
+			'public'          => false,
+			'show_in_nav_menus' => true,
 			'show_ui'           => true,
 			'show_in_nav_menus' => true,
 			'show_in_rest'      => true,
 			'show_admin_column' => true,
 			'query_var'         => true,
-			'rewrite'           => array( 'slug' => 'magazine-article-category' ),
+			'rewrite'           => array( 'slug' => 'project-type' ),
 		) );
 		register_taxonomy( self::CUSTOM_TAXONOMY_TAG, self::CUSTOM_POST_TYPE, array(
 			'hierarchical'      => false,
 			'labels'            => array(
-				'name'                       => esc_html__( 'Magazine Article Tags',                   'jetpack' ),
-				'singular_name'              => esc_html__( 'Magazine Article Tag',                    'jetpack' ),
-				'menu_name'                  => esc_html__( 'Magazine Article Tags',                   'jetpack' ),
-				'all_items'                  => esc_html__( 'All Magazine Article Tags',               'jetpack' ),
-				'edit_item'                  => esc_html__( 'Edit Magazine Article Tag',               'jetpack' ),
-				'view_item'                  => esc_html__( 'View Magazine Article Tag',               'jetpack' ),
-				'update_item'                => esc_html__( 'Update Magazine Article Tag',             'jetpack' ),
-				'add_new_item'               => esc_html__( 'Add New Magazine Article Tag',            'jetpack' ),
-				'new_item_name'              => esc_html__( 'New Magazine Article Tag Name',           'jetpack' ),
-				'search_items'               => esc_html__( 'Search Magazine Article Tags',            'jetpack' ),
-				'popular_items'              => esc_html__( 'Popular Magazine Article Tags',           'jetpack' ),
-				'separate_items_with_commas' => esc_html__( 'Separate tags with commas',               'jetpack' ),
-				'add_or_remove_items'        => esc_html__( 'Add or remove tags',                      'jetpack' ),
-				'choose_from_most_used'      => esc_html__( 'Choose from the most used tags',          'jetpack' ),
-				'not_found'                  => esc_html__( 'No tags found.',                          'jetpack' ),
-				'items_list_navigation'      => esc_html__( 'Magazine Article tag list navigation',    'jetpack' ),
-				'items_list'                 => esc_html__( 'Magazine Article tag list',               'jetpack' ),
+				'name'                       => esc_html__( 'Tags',                   'jetpack' ),
+				'singular_name'              => esc_html__( 'Tag',                    'jetpack' ),
+				'menu_name'                  => esc_html__( 'Magazine Tags',                   'jetpack' ),
+				'all_items'                  => esc_html__( 'All Tags',               'jetpack' ),
+				'edit_item'                  => esc_html__( 'Edit Tag',               'jetpack' ),
+				'view_item'                  => esc_html__( 'View Tag',               'jetpack' ),
+				'update_item'                => esc_html__( 'Update Tag',             'jetpack' ),
+				'add_new_item'               => esc_html__( 'Add New Tag',            'jetpack' ),
+				'new_item_name'              => esc_html__( 'New Tag Name',           'jetpack' ),
+				'search_items'               => esc_html__( 'Search Tags',            'jetpack' ),
+				'popular_items'              => esc_html__( 'Popular Tags',           'jetpack' ),
+				'separate_items_with_commas' => esc_html__( 'Separate tags with commas',      'jetpack' ),
+				'add_or_remove_items'        => esc_html__( 'Add or remove tags',             'jetpack' ),
+				'choose_from_most_used'      => esc_html__( 'Choose from the most used tags', 'jetpack' ),
+				'not_found'                  => esc_html__( 'No tags found.',                 'jetpack' ),
+				'items_list_navigation'      => esc_html__( 'Tag list navigation',    'jetpack' ),
+				'items_list'                 => esc_html__( 'Tag list',               'jetpack' ),
 			),
-			'public'            => true,
+			'public'          => false,
+			'show_in_nav_menus' => true,
 			'show_ui'           => true,
 			'show_in_nav_menus' => true,
 			'show_in_rest'      => true,
 			'show_admin_column' => true,
 			'query_var'         => true,
-			'rewrite'           => array( 'slug' => 'magazine-article-tag' ),
+			'rewrite'           => array( 'slug' => 'project-tag' ),
 		) );
 	}
 	/**
@@ -354,19 +352,19 @@ class Jetpack_Magazine_Article {
 		global $post;
 		$messages[self::CUSTOM_POST_TYPE] = array(
 			0  => '', // Unused. Messages start at index 1.
-			1  => sprintf( __( 'Magazine Article updated. <a href="%s">View item</a>', 'jetpack'), esc_url( get_permalink( $post->ID ) ) ),
+			1  => sprintf( __( 'Article updated. <a href="%s">View item</a>', 'jetpack'), esc_url( get_permalink( $post->ID ) ) ),
 			2  => esc_html__( 'Custom field updated.', 'jetpack' ),
 			3  => esc_html__( 'Custom field deleted.', 'jetpack' ),
-			4  => esc_html__( 'Magazine Article updated.', 'jetpack' ),
+			4  => esc_html__( 'Article updated.', 'jetpack' ),
 			/* translators: %s: date and time of the revision */
-			5  => isset( $_GET['revision'] ) ? sprintf( esc_html__( 'Magazine Article restored to revision from %s', 'jetpack'), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-			6  => sprintf( __( 'Magazine Article published. <a href="%s">View magazine article</a>', 'jetpack' ), esc_url( get_permalink( $post->ID ) ) ),
-			7  => esc_html__( 'Magazine article saved.', 'jetpack' ),
-			8  => sprintf( __( 'Magazine Article submitted. <a target="_blank" href="%s">Preview magazine article</a>', 'jetpack'), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) ),
-			9  => sprintf( __( 'Magazine Article scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview magazine article</a>', 'jetpack' ),
+			5  => isset( $_GET['revision'] ) ? sprintf( esc_html__( 'Article restored to revision from %s', 'jetpack'), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+			6  => sprintf( __( 'Article published. <a href="%s">View article</a>', 'jetpack' ), esc_url( get_permalink( $post->ID ) ) ),
+			7  => esc_html__( 'Article saved.', 'jetpack' ),
+			8  => sprintf( __( 'Article submitted. <a target="_blank" href="%s">Preview article</a>', 'jetpack'), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) ),
+			9  => sprintf( __( 'Article scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview article</a>', 'jetpack' ),
 			// translators: Publish box date format, see http://php.net/date
 			date_i18n( __( 'M j, Y @ G:i', 'jetpack' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post->ID ) ) ),
-			10 => sprintf( __( 'Magazine Article item draft updated. <a target="_blank" href="%s">Preview magazine article</a>', 'jetpack' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) ),
+			10 => sprintf( __( 'Article item draft updated. <a target="_blank" href="%s">Preview article</a>', 'jetpack' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) ),
 		);
 		return $messages;
 	}
@@ -375,10 +373,10 @@ class Jetpack_Magazine_Article {
 	 * Add Featured Image column
 	 */
 	function edit_admin_columns( $columns ) {
-		// change 'Title' to 'Magazine Article'
-		$columns['title'] = __( 'Magazine Article', 'jetpack' );
+		// change 'Title' to 'Articles'
+		$columns['title'] = __( 'Articles', 'jetpack' );
 		if ( current_theme_supports( 'post-thumbnails' ) ) {
-			// add featured image before 'Magazine Article'
+			// add featured image before 'Articles'
 			$columns = array_slice( $columns, 0, 1, true ) + array( 'thumbnail' => '' ) + array_slice( $columns, 1, NULL, true );
 		}
 		return $columns;
@@ -418,7 +416,7 @@ class Jetpack_Magazine_Article {
 		) );
 		if ( isset( $options[0]['title'] ) && true === $options[0]['title'] ) {
 			$wp_customize->add_setting( 'jetpack_magazine_article_title', array(
-				'default'              => esc_html__( 'Magazine Articles', 'jetpack' ),
+				'default'              => esc_html__( 'Articles', 'jetpack' ),
 				'type'                 => 'option',
 				'sanitize_callback'    => 'sanitize_text_field',
 				'sanitize_js_callback' => 'sanitize_text_field',
@@ -638,7 +636,7 @@ class Jetpack_Magazine_Article {
 				$query->the_post();
 				$post_id = get_the_ID();
 				?>
-				<div class="magazine-article-entry <?php echo esc_attr( self::get_magazine_article_class( $magazine_article_index_number, $atts['columns'] ) ); ?>">
+				<div class="magazine-article-entry <?php echo esc_attr( self::get_project_class( $magazine_article_index_number, $atts['columns'] ) ); ?>">
 					<header class="magazine-article-entry-header">
 					<?php
 					// Featured image
@@ -650,13 +648,13 @@ class Jetpack_Magazine_Article {
 						<div class="magazine-article-entry-meta">
 						<?php
 						if ( false != $atts['display_types'] ) {
-							echo self::get_magazine_article_type( $post_id );
+							echo self::get_project_type( $post_id );
 						}
 						if ( false != $atts['display_tags'] ) {
-							echo self::get_magazine_article_tags( $post_id );
+							echo self::get_project_tags( $post_id );
 						}
 						if ( false != $atts['display_author'] ) {
-							echo self::get_magazine_article_author( $post_id );
+							echo self::get_project_author( $post_id );
 						}
 						?>
 						</div>
@@ -699,17 +697,17 @@ class Jetpack_Magazine_Article {
 		return $html;
 	}
 	/**
-	 * Individual magazine article class
+	 * Individual project class
 	 *
 	 * @return string
 	 */
-	static function get_magazine_article_class( $magazine_article_index_number, $columns ) {
-		$magazine_article_types = wp_get_object_terms( get_the_ID(), self::CUSTOM_TAXONOMY_TYPE, array( 'fields' => 'slugs' ) );
+	static function get_project_class( $magazine_article_index_number, $columns ) {
+		$project_types = wp_get_object_terms( get_the_ID(), self::CUSTOM_TAXONOMY_TYPE, array( 'fields' => 'slugs' ) );
 		$class = array();
 		$class[] = 'magazine-article-entry-column-'.$columns;
-		// add a type- class for each magazine article type
-		foreach ( $magazine_article_types as $magazine_article_type ) {
-			$class[] = 'type-' . esc_html( $magazine_article_type );
+		// add a type- class for each project type
+		foreach ( $project_types as $project_type ) {
+			$class[] = 'type-' . esc_html( $project_type );
 		}
 		if( $columns > 1) {
 			if ( ( $magazine_article_index_number % 2 ) == 0 ) {
@@ -725,7 +723,7 @@ class Jetpack_Magazine_Article {
 			$class[] = 'magazine-article-entry-last-item-row';
 		}
 		/**
-		 * Filter the class applied to magazine article div in the magazine article
+		 * Filter the class applied to project div in the magazine article
 		 *
 		 * @module custom-content-types
 		 *
@@ -736,65 +734,65 @@ class Jetpack_Magazine_Article {
 		 * @param int $columns number of columns to display the content in.
 		 *
 		 */
-		return apply_filters( 'magazine-article-post-class', implode( " ", $class ) , $magazine_article_index_number, $columns );
+		return apply_filters( 'magazine-article-project-post-class', implode( " ", $class ) , $magazine_article_index_number, $columns );
 	}
 	/**
-	 * Displays the magazine article type that a magazine article belongs to.
+	 * Displays the project type that a project belongs to.
 	 *
 	 * @return html
 	 */
-	static function get_magazine_article_type( $post_id ) {
-		$magazine_article_types = get_the_terms( $post_id, self::CUSTOM_TAXONOMY_TYPE );
+	static function get_project_type( $post_id ) {
+		$project_types = get_the_terms( $post_id, self::CUSTOM_TAXONOMY_TYPE );
 		// If no types, return empty string
-		if ( empty( $magazine_article_types ) || is_wp_error( $magazine_article_types ) ) {
+		if ( empty( $project_types ) || is_wp_error( $project_types ) ) {
 			return;
 		}
-		$html = '<div class="magazine-article-types"><span>' . __( 'Types', 'jetpack' ) . ':</span>';
+		$html = '<div class="project-types"><span>' . __( 'Types', 'jetpack' ) . ':</span>';
 		$types = array();
 		// Loop thorugh all the types
-		foreach ( $magazine_article_types as $magazine_article_type ) {
-			$magazine_article_type_link = get_term_link( $magazine_article_type, self::CUSTOM_TAXONOMY_TYPE );
-			if ( is_wp_error( $magazine_article_type_link ) ) {
-				return $magazine_article_type_link;
+		foreach ( $project_types as $project_type ) {
+			$project_type_link = get_term_link( $project_type, self::CUSTOM_TAXONOMY_TYPE );
+			if ( is_wp_error( $project_type_link ) ) {
+				return $project_type_link;
 			}
-			$types[] = '<a href="' . esc_url( $magazine_article_type_link ) . '" rel="tag">' . esc_html( $magazine_article_type->name ) . '</a>';
+			$types[] = '<a href="' . esc_url( $project_type_link ) . '" rel="tag">' . esc_html( $project_type->name ) . '</a>';
 		}
 		$html .= ' '.implode( ', ', $types );
 		$html .= '</div>';
 		return $html;
 	}
 	/**
-	 * Displays the magazine article tags that a magazine article belongs to.
+	 * Displays the project tags that a project belongs to.
 	 *
 	 * @return html
 	 */
-	static function get_magazine_article_tags( $post_id ) {
-		$magazine_article_tags = get_the_terms( $post_id, self::CUSTOM_TAXONOMY_TAG );
+	static function get_project_tags( $post_id ) {
+		$project_tags = get_the_terms( $post_id, self::CUSTOM_TAXONOMY_TAG );
 		// If no tags, return empty string
-		if ( empty( $magazine_article_tags ) || is_wp_error( $magazine_article_tags ) ) {
+		if ( empty( $project_tags ) || is_wp_error( $project_tags ) ) {
 			return false;
 		}
-		$html = '<div class="magazine-article-tags"><span>' . __( 'Tags', 'jetpack' ) . ':</span>';
+		$html = '<div class="project-tags"><span>' . __( 'Tags', 'jetpack' ) . ':</span>';
 		$tags = array();
 		// Loop thorugh all the tags
-		foreach ( $magazine_article_tags as $magazine_article_tag ) {
-			$magazine_article_tag_link = get_term_link( $magazine_article_tag, self::CUSTOM_TAXONOMY_TYPE );
-			if ( is_wp_error( $magazine_article_tag_link ) ) {
-				return $magazine_article_tag_link;
+		foreach ( $project_tags as $project_tag ) {
+			$project_tag_link = get_term_link( $project_tag, self::CUSTOM_TAXONOMY_TYPE );
+			if ( is_wp_error( $project_tag_link ) ) {
+				return $project_tag_link;
 			}
-			$tags[] = '<a href="' . esc_url( $magazine_article_tag_link ) . '" rel="tag">' . esc_html( $magazine_article_tag->name ) . '</a>';
+			$tags[] = '<a href="' . esc_url( $project_tag_link ) . '" rel="tag">' . esc_html( $project_tag->name ) . '</a>';
 		}
 		$html .= ' '. implode( ', ', $tags );
 		$html .= '</div>';
 		return $html;
 	}
 	/**
-	 * Displays the author of the current magazine article.
+	 * Displays the author of the current magazine article project.
 	 *
 	 * @return html
 	 */
-	static function get_magazine_article_author() {
-		$html = '<div class="magazine-article-author">';
+	static function get_project_author() {
+		$html = '<div class="project-author">';
 		/* translators: %1$s is link to author posts, %2$s is author display name */
 		$html .= sprintf( __( '<span>Author:</span> <a href="%1$s">%2$s</a>', 'jetpack' ),
 			esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ),
