@@ -9,8 +9,8 @@ class Jetpack_Magazine_Article {
 	
 	
 	const CUSTOM_POST_TYPE       = 'magazine-article';
-	const CUSTOM_TAXONOMY_TYPE   = 'jetpack-magazine-category';
-	const CUSTOM_TAXONOMY_TAG    = 'jetpack-magazine-tag';
+	const CUSTOM_TAXONOMY_TYPE   = 'jetpack-magazinearticle-category';
+	const CUSTOM_TAXONOMY_TAG    = 'jetpack-magazinearticle-tag';
 	const OPTION_NAME            = 'jetpack_magazine_article';
 	const OPTION_READING_SETTING = 'jetpack_magazine_article_posts_per_page';
 	public $version = '0.1';
