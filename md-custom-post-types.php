@@ -56,6 +56,7 @@ Class Millionairesdigest_Cpt {
 	require_once $this->path . 'md-custom-post-type-music.php';
 	require_once $this->path . 'md-custom-post-type-magazine-article.php';
 	require_once $this->path . 'md-custom-post-type-company.php';
+	require_once $this->path . 'md-custom-post-type-magazine.php';
 
     }
 
