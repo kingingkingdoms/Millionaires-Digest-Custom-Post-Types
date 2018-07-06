@@ -776,7 +776,7 @@ class Jetpack_Company {
 		$tags = array();
 		// Loop thorugh all the tags
 		foreach ( $project_tags as $project_tag ) {
-			$project_tag_link = get_term_link( $project_tag, self::CUSTOM_TAXONOMY_TYPE );
+			$project_tag_link = get_term_link( $project_tag, self::CUSTOM_TAXONOMY_TAG );
 			if ( is_wp_error( $project_tag_link ) ) {
 				return $project_tag_link;
 			}
