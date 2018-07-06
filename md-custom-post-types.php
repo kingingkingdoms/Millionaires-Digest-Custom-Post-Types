@@ -49,15 +49,24 @@ Class Millionairesdigest_Cpt {
      * load widget class
      */
     public function load() {
-
-        require_once $this->path . 'md-custom-post-type-article.php';
-	require_once $this->path . 'md-custom-post-type-video.php';
-	require_once $this->path . 'md-custom-post-type-photo.php';
-	require_once $this->path . 'md-custom-post-type-music.php';
-	require_once $this->path . 'md-custom-post-type-magazine-article.php';
-	require_once $this->path . 'md-custom-post-type-company.php';
-	require_once $this->path . 'md-custom-post-type-magazine.php';
-
+	    require_once $this->path . 'md-custom-post-type-article.php';
+	    require_once $this->path . 'md-custom-post-type-video.php';
+	    require_once $this->path . 'md-custom-post-type-photo.php';
+	    require_once $this->path . 'md-custom-post-type-music.php';
+	    require_once $this->path . 'md-custom-post-type-magazine-article.php';
+	    require_once $this->path . 'md-custom-post-type-company.php';
+	    require_once $this->path . 'md-custom-post-type-magazine.php';
+	    require_once $this->path . 'md-custom-post-type-one.php';
+	    require_once $this->path . 'md-custom-post-type-two.php';
+	    require_once $this->path . 'md-custom-post-type-three.php';
+	    require_once $this->path . 'md-custom-post-type-four.php';
+	    require_once $this->path . 'md-custom-post-type-five.php';
+	    require_once $this->path . 'md-custom-post-type-six.php';
+	    require_once $this->path . 'md-custom-post-type-seven.php';
+	    require_once $this->path . 'md-custom-post-type-eight.php';
+	    require_once $this->path . 'md-custom-post-type-nine.php';
+	    require_once $this->path . 'md-custom-post-type-ten.php';
+	    
     }
 
 }
