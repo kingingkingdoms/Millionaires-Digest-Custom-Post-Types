@@ -1,16 +1,18 @@
 <?php
+
 // exit if file access directly
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 class Jetpack_Magazine {
+	
+	
 	const CUSTOM_POST_TYPE       = 'magazine';
-	const OPTION_NAME            = 'jetpack_magazine';
-	const OPTION_READING_SETTING = 'jetpack_magazine_posts_per_page';
 	const CUSTOM_TAXONOMY_TYPE   = 'jetpack-magazine-category';
 	const CUSTOM_TAXONOMY_TAG    = 'jetpack-magazine-tag';
-	
+	const OPTION_NAME            = 'jetpack_magazine';
+	const OPTION_READING_SETTING = 'jetpack_magazine_posts_per_page';
 	public $version = '0.1';
 	static function init() {
 		static $instance = false;
@@ -87,7 +89,7 @@ class Jetpack_Magazine {
 	function settings_api_init() {
 		add_settings_field(
 			self::OPTION_NAME,
-			'<span class="cpt-options">' . __( 'Magazines', 'jetpack' ) . '</span>',
+			'<span class="cpt-options">' . __( 'Magazine', 'jetpack' ) . '</span>',
 			array( $this, 'setting_html' ),
 			'writing',
 			'jetpack_cpt_section'
@@ -118,7 +120,7 @@ class Jetpack_Magazine {
 		<?php else : ?>
 			<label for="<?php echo esc_attr( self::OPTION_NAME ); ?>">
 				<input name="<?php echo esc_attr( self::OPTION_NAME ); ?>" id="<?php echo esc_attr( self::OPTION_NAME ); ?>" <?php echo checked( get_option( self::OPTION_NAME, '0' ), true, false ); ?> type="checkbox" value="1" />
-				<?php esc_html_e( 'Enable Magazines for this site.', 'jetpack' ); ?>
+				<?php esc_html_e( 'Enable Magazine for this site.', 'jetpack' ); ?>
 				<a target="_blank" href="http://en.support.wordpress.com/magazines/"><?php esc_html_e( 'Learn More', 'jetpack' ); ?></a>
 			</label>
 		<?php endif;
@@ -209,20 +211,20 @@ class Jetpack_Magazine {
 	 * On theme switch, check if CPT item exists and disable if not
 	 */
 	function deactivation_post_type_support() {
-		$magazines = get_posts( array(
+		$magazine = get_posts( array(
 			'fields'           => 'ids',
 			'posts_per_page'   => 1,
 			'post_type'        => self::CUSTOM_POST_TYPE,
 			'suppress_filters' => false
 		) );
-		if ( empty( $magazines ) ) {
+		if ( empty( $magazine ) ) {
 			update_option( self::OPTION_NAME, '0' );
 		}
 	}
 	/**
 	 * Register Post Type
 	 */
-	function register_post_types() {
+	function register_post_types() {		
 		if ( post_type_exists( self::CUSTOM_POST_TYPE ) ) {
 			return;
 		}
@@ -235,7 +237,7 @@ class Jetpack_Magazine {
 				'all_items'             => esc_html__( 'All Magazines',               'jetpack' ),
 				'add_new'               => esc_html__( 'Add New',                    'jetpack' ),
 				'add_new_item'          => esc_html__( 'Add New Magazine',            'jetpack' ),
-				'edit_item'             => esc_html__( 'Edit Masgazine',               'jetpack' ),
+				'edit_item'             => esc_html__( 'Edit Magazine',               'jetpack' ),
 				'new_item'              => esc_html__( 'New Magazine',                'jetpack' ),
 				'view_item'             => esc_html__( 'View Magazine',               'jetpack' ),
 				'search_items'          => esc_html__( 'Search Magazines',            'jetpack' ),
@@ -262,7 +264,8 @@ class Jetpack_Magazine {
 				'feeds'      => true,
 				'pages'      => true,
 			),
-			'public'          => true,
+			'public'          => false,
+			'show_in_nav_menus' => true,
 			'show_ui'         => true,
 			'menu_position'   => '',                    // below Pages
 			'menu_icon'       => 'dashicons-admin-post', // 3.8+ dashicon option
@@ -276,15 +279,14 @@ class Jetpack_Magazine {
  'read_private_posts' => 'edit_others_posts',
  'edit_post' => 'edit_others_posts',
  'delete_post' => 'edit_others_posts',
- 'read_post' => 'edit_posts',
+ 'read_post' => 'edit_others_posts',
  ),
-			'map_meta_cap'    => true,
+			
 			'taxonomies'      => array( self::CUSTOM_TAXONOMY_TYPE, self::CUSTOM_TAXONOMY_TAG ),
 			'has_archive'     => true,
 			'query_var'       => 'magazine',
 			'show_in_rest'    => true,
 		) );
-		
 		register_taxonomy( self::CUSTOM_TAXONOMY_TYPE, self::CUSTOM_POST_TYPE, array(
 			'hierarchical'      => true,
 			'labels'            => array(
@@ -310,7 +312,7 @@ class Jetpack_Magazine {
 			'show_in_rest'      => true,
 			'show_admin_column' => true,
 			'query_var'         => true,
-			'rewrite'           => array( 'slug' => 'project-type' ),
+			'rewrite'           => array( 'slug' => 'magazine-type' ),
 		) );
 		register_taxonomy( self::CUSTOM_TAXONOMY_TAG, self::CUSTOM_POST_TYPE, array(
 			'hierarchical'      => false,
@@ -340,7 +342,7 @@ class Jetpack_Magazine {
 			'show_in_rest'      => true,
 			'show_admin_column' => true,
 			'query_var'         => true,
-			'rewrite'           => array( 'slug' => 'project-tag' ),
+			'rewrite'           => array( 'slug' => 'magazine-tag' ),
 		) );
 	}
 	/**
@@ -568,7 +570,7 @@ class Jetpack_Magazine {
 			}
 		}
 		// enqueue shortcode styles when shortcode is used
-		wp_enqueue_style( 'jetpack-magazine-style', plugins_url( 'css/magazine-shortcode.css', __FILE__ ), array(), '20140326' );
+		wp_enqueue_style( 'jetpack-magazine-style', plugins_url( 'css/portfolio-shortcode.css', __FILE__ ), array(), '20140326' );
 		return self::magazine_shortcode_html( $atts );
 	}
 	/**
