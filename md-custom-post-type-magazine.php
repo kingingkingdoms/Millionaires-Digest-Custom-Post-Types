@@ -312,7 +312,7 @@ class Jetpack_Magazine {
 			'show_in_rest'      => true,
 			'show_admin_column' => true,
 			'query_var'         => true,
-			'rewrite'           => array( 'slug' => 'magazine-type' ),
+			'rewrite'           => array( 'slug' => 'project-type' ),
 		) );
 		register_taxonomy( self::CUSTOM_TAXONOMY_TAG, self::CUSTOM_POST_TYPE, array(
 			'hierarchical'      => false,
@@ -342,7 +342,7 @@ class Jetpack_Magazine {
 			'show_in_rest'      => true,
 			'show_admin_column' => true,
 			'query_var'         => true,
-			'rewrite'           => array( 'slug' => 'magazine-tag' ),
+			'rewrite'           => array( 'slug' => 'project-tag' ),
 		) );
 	}
 	/**
