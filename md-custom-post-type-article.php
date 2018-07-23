@@ -294,8 +294,8 @@ class Jetpack_Article {
 				'excerpt',
 			),
 			'rewrite' => array(
-				'slug'       => 'article',
-				'with_front' => false,
+				'slug'       => 'articles',
+				'with_front' => true,
 				'feeds'      => true,
 				'pages'      => true,
 			),
@@ -303,22 +303,10 @@ class Jetpack_Article {
 			'show_ui'         => true,
 			'menu_position'   => '',                    // below Pages
 			'menu_icon'       => 'dashicons-admin-post', // 3.8+ dashicon option
-			'capability_type' => 'page',
-			'capabilities' => array( // allow only to admin
- 'publish_posts' => 'edit_posts',
- 'edit_posts' => 'edit_posts',
- 'edit_others_posts' => 'edit_posts',
- 'delete_posts' => 'edit_posts',
- 'delete_others_posts' => 'edit_posts',
- 'read_private_posts' => 'edit_posts',
- 'edit_post' => 'edit_posts',
- 'delete_post' => 'edit_posts',
- 'read_post' => 'edit_posts',
- ),
-			'map_meta_cap'    => true,
+			'capability_type' => 'post',
 			'taxonomies'      => array( "category", "post_tag" ),
 			'has_archive'     => true,
-			'query_var'       => 'article',
+			'query_var'       => 'articles',
 			'show_in_rest'    => true,
 		) );
 	}
