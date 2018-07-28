@@ -273,7 +273,8 @@ class Jetpack_Music {
 				'add_new'               => esc_html__( 'Add New',                    'jetpack' ),
 				'add_new_item'          => esc_html__( 'Add New Song',            'jetpack' ),
 				'edit_item'             => esc_html__( 'Edit Song',               'jetpack' ),
-				'new_item'              => esc_html__( 'New Song',               'jetpack' ),
+				'new_item'              => esc_html__( 'New Song',                'jetpack' ),
+				'view_item'             => esc_html__( 'View Song',               'jetpack' ),
 				'search_items'          => esc_html__( 'Search Songs',            'jetpack' ),
 				'not_found'             => esc_html__( 'No Songs found',          'jetpack' ),
 				'not_found_in_trash'    => esc_html__( 'No Songs found in Trash', 'jetpack' ),
@@ -293,7 +294,7 @@ class Jetpack_Music {
 				'excerpt',
 			),
 			'rewrite' => array(
-				'slug'       => 'music',
+				'slug'       => 'songs',
 				'with_front' => true,
 				'feeds'      => true,
 				'pages'      => true,
@@ -305,7 +306,7 @@ class Jetpack_Music {
 			'capability_type' => 'post',
 			'taxonomies'      => array( "category", "post_tag" ),
 			'has_archive'     => true,
-			'query_var'       => 'music',
+			'query_var'       => 'songs',
 			'show_in_rest'    => true,
 		) );
 	}
@@ -318,19 +319,19 @@ class Jetpack_Music {
 
 		$messages[self::CUSTOM_POST_TYPE] = array(
 			0  => '', // Unused. Messages start at index 1.
-			1  => sprintf( __( 'Music updated. <a href="%s">View item</a>', 'jetpack'), esc_url( get_permalink( $post->ID ) ) ),
+			1  => sprintf( __( 'Song updated. <a href="%s">View item</a>', 'jetpack'), esc_url( get_permalink( $post->ID ) ) ),
 			2  => esc_html__( 'Custom field updated.', 'jetpack' ),
 			3  => esc_html__( 'Custom field deleted.', 'jetpack' ),
-			4  => esc_html__( 'Music updated.', 'jetpack' ),
+			4  => esc_html__( 'Song updated.', 'jetpack' ),
 			/* translators: %s: date and time of the revision */
-			5  => isset( $_GET['revision'] ) ? sprintf( esc_html__( 'Music restored to revision from %s', 'jetpack'), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-			6  => sprintf( __( 'Music published. <a href="%s">View music</a>', 'jetpack' ), esc_url( get_permalink( $post->ID ) ) ),
-			7  => esc_html__( 'Music saved.', 'jetpack' ),
-			8  => sprintf( __( 'Music submitted. <a target="_blank" href="%s">Preview music</a>', 'jetpack'), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) ),
-			9  => sprintf( __( 'Music scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview music</a>', 'jetpack' ),
+			5  => isset( $_GET['revision'] ) ? sprintf( esc_html__( 'Song restored to revision from %s', 'jetpack'), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+			6  => sprintf( __( 'Song published. <a href="%s">View song</a>', 'jetpack' ), esc_url( get_permalink( $post->ID ) ) ),
+			7  => esc_html__( 'Song saved.', 'jetpack' ),
+			8  => sprintf( __( 'Song submitted. <a target="_blank" href="%s">Preview song</a>', 'jetpack'), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) ),
+			9  => sprintf( __( 'Song scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview song</a>', 'jetpack' ),
 			// translators: Publish box date format, see http://php.net/date
 			date_i18n( __( 'M j, Y @ G:i', 'jetpack' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post->ID ) ) ),
-			10 => sprintf( __( 'Music item draft updated. <a target="_blank" href="%s">Preview music</a>', 'jetpack' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) ),
+			10 => sprintf( __( 'Song item draft updated. <a target="_blank" href="%s">Preview song</a>', 'jetpack' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) ),
 		);
 
 		return $messages;
@@ -341,10 +342,10 @@ class Jetpack_Music {
 	 * Add Featured Image column
 	 */
 	function edit_admin_columns( $columns ) {
-		// change 'Title' to 'Music'
-		$columns['title'] = __( 'Music', 'jetpack' );
+		// change 'Title' to 'Songs'
+		$columns['title'] = __( 'Songs', 'jetpack' );
 		if ( current_theme_supports( 'post-thumbnails' ) ) {
-			// add featured image before 'Music'
+			// add featured image before 'Songs'
 			$columns = array_slice( $columns, 0, 1, true ) + array( 'thumbnail' => '' ) + array_slice( $columns, 1, NULL, true );
 		}
 
@@ -392,7 +393,7 @@ class Jetpack_Music {
 
 		if ( isset( $options[0]['title'] ) && true === $options[0]['title'] ) {
 			$wp_customize->add_setting( 'jetpack_music_title', array(
-				'default'              => esc_html__( 'Music', 'jetpack' ),
+				'default'              => esc_html__( 'Songs', 'jetpack' ),
 				'type'                 => 'option',
 				'sanitize_callback'    => 'sanitize_text_field',
 				'sanitize_js_callback' => 'sanitize_text_field',
@@ -421,7 +422,7 @@ class Jetpack_Music {
 		}
 
 		if ( isset( $options[0]['featured-image'] ) && true === $options[0]['featured-image'] ) {
-			$wp_customize->add_setting( 'jetpack_musicfeatured_image', array(
+			$wp_customize->add_setting( 'jetpack_music_featured_image', array(
 				'default'              => '',
 				'type'                 => 'option',
 				'sanitize_callback'    => 'attachment_url_to_postid',
