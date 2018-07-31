@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class Jetpack_Music {
-	const CUSTOM_POST_TYPE       = 'music';
+	const CUSTOM_POST_TYPE       = 'audio';
 	const OPTION_NAME            = 'jetpack_music';
 	const OPTION_READING_SETTING = 'jetpack_music_posts_per_page';
 
