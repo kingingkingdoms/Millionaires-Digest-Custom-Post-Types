@@ -294,7 +294,7 @@ class Jetpack_Music {
 				'excerpt',
 			),
 			'rewrite' => array(
-				'slug'       => 'songs',
+				'slug'       => 'music',
 				'with_front' => true,
 				'feeds'      => true,
 				'pages'      => true,
@@ -306,7 +306,7 @@ class Jetpack_Music {
 			'capability_type' => 'post',
 			'taxonomies'      => array( "category", "post_tag" ),
 			'has_archive'     => true,
-			'query_var'       => 'songs',
+			'query_var'       => 'music',
 			'show_in_rest'    => true,
 		) );
 	}
